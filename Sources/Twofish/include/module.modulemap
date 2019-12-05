@@ -1,0 +1,4 @@
+module Twofish {
+    umbrella header "twofish.h"
+    export *
+}
