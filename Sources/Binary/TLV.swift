@@ -18,7 +18,20 @@
 
 import Foundation
 
-public struct TLV<Type, Lenght> where Lenght: BinaryInteger {
+public protocol TLVProtocol {
+
+    associatedtype `Type`
+
+    associatedtype Lenght: BinaryInteger
+
+    associatedtype Value
+
+    var type: Type { get }
+
+    var value: Value { get set }
+}
+
+public struct TLV<Type, Lenght>: TLVProtocol where Lenght: BinaryInteger {
 
     public let type: Type
 
@@ -29,13 +42,12 @@ public struct TLV<Type, Lenght> where Lenght: BinaryInteger {
         self.value = value
     }
 
-    public func get<T>() throws -> T where T: Readable {
-        let stream = Input(bytes: value)
-        return try stream.read()
+    public func get<T>() throws -> T where T: BytesRepresentable {
+        return try T(value)
     }
 
-    public mutating func set<T>(_ value: T) throws where T: Writable {
-        self.value = withUnsafeBytes(of: value) { Bytes($0) }
+    public mutating func set<T>(_ value: T?) throws where T: BytesRepresentable {
+        self.value = value?.bytes ?? []
     }
 }
 
@@ -55,6 +67,33 @@ extension TLV: Writable where Type: Writable, Lenght: Writable {
         try output.write(type)
         try output.write(Lenght(value.lenght))
         try output.write(value)
+    }
+
+}
+
+extension Sequence where Element: TLVProtocol, Element.`Type`: Equatable, Element.Value == Bytes {
+
+    public func first<T>(valueOf type: Element.`Type`) throws -> T? where T: BytesRepresentable {
+        return try first(where: { $0.type == type }).map { try T($0.value) }
+    }
+
+    public func first<T>(where type: Element.`Type`, _ predicate: (T) throws -> Bool) throws -> Element? where T: BytesRepresentable {
+        return try first(where: { try predicate(try T($0.value)) })
+    }
+
+    public func sorted<T>(field: Element.`Type`, by areInIncreasingOrder: (T, T) throws -> Bool) throws -> [Self.Element] where T: BytesRepresentable {
+        return try sorted(by: { try areInIncreasingOrder(try T($0.value), try T($1.value)) })
+    }
+
+    public subscript<T>(_ type: Element.`Type`) -> T? where T: BytesRepresentable {
+        try? first(valueOf: type)
+    }
+}
+
+extension RangeReplaceableCollection where Element: TLVProtocol, Element.`Type`: Equatable {
+
+    public mutating func removeAll(_ type: Element.`Type`) {
+        removeAll(where: { $0.type == type })
     }
 
 }
