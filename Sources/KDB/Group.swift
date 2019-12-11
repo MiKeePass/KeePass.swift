@@ -21,9 +21,9 @@ import Binary
 
 public final class Group: Row, Streamable {
 
-    public static let End = Field.end
+    public static let End = Type.end
 
-    public enum Field: UInt16, Streamable {
+    public enum `Type`: UInt16, Streamable {
         case reserved           = 0x0000
         case groupID            = 0x0001
         case name               = 0x0002
@@ -37,7 +37,9 @@ public final class Group: Row, Streamable {
         case end                = 0xFFFF
     }
 
-    public var fields: [TLV<Field, UInt32>]
+    var parent: Group?
+
+    public var fields: [Field<Type>]
 
     public var childs: [Group]
 
@@ -48,4 +50,36 @@ public final class Group: Row, Streamable {
         childs = []
         entries = []
     }
+}
+
+extension Group {
+
+    public func removeFromParent() {
+        parent?.childs.removeAll(where: { $0 == self })
+    }
+
+    public func add(_ entry: Entry) {
+        entry.removeFromParent()
+        entries.append(entry)
+        entry[.groupID] = self[.groupID]
+    }
+
+    public func add(_ group: Group) {
+        group.removeFromParent()
+        childs.append(group)
+    }
+}
+
+extension Group: Hashable {
+
+    public static func == (lhs: Group, rhs: Group) -> Bool {
+        guard let lhs = lhs[.groupLevel], let rhs = rhs[.groupLevel] else { return false }
+        return lhs == rhs
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        if let groupLevel = self[.groupLevel] { hasher.combine(groupLevel) }
+        if let groupFlags = self[.groupFlags] { hasher.combine(groupFlags) }
+    }
+
 }

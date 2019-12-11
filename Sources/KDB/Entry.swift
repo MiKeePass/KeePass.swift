@@ -41,9 +41,9 @@ let MetaEntryKeePassKitUserTemplates         = "KeePassKit User Templates"
 
 public final class Entry: Row, Streamable {
 
-    public static let End = Field.end
+    public static let End = Type.end
 
-    public enum Field: UInt16, Streamable {
+    public enum `Type`: UInt16, Streamable {
         case reserved           = 0x0000
         case uuid               = 0x0001
         case groupID            = 0x0002
@@ -62,12 +62,13 @@ public final class Entry: Row, Streamable {
         case end                = 0xFFFF
     }
 
-    public var fields: [TLV<Field, UInt32>]
+    var parent: Group?
+
+    public var fields: [Field<Type>]
 
     public required init() {
         fields = []
-    }
-    
+    }    
 }
 
 extension Entry {
@@ -75,4 +76,23 @@ extension Entry {
     var isMetaEntry: Bool {
         return false
     }
+
+    public func removeFromParent() {
+        parent?.entries.removeAll(where: { $0 == self })
+        fields.removeAll(.groupID)
+    }
+}
+
+extension Entry: Hashable {
+
+    public static func == (lhs: Entry, rhs: Entry) -> Bool {
+        guard let lhs = lhs[.uuid], let rhs = rhs[.uuid] else { return false }
+        return lhs == rhs
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        if let uuid = self[.uuid] { hasher.combine(uuid) }
+        else if let title = self[.title] { hasher.combine(title) }
+    }
+
 }

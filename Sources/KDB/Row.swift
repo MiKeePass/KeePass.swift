@@ -19,34 +19,46 @@
 import Foundation
 import Binary
 
-public protocol Row {
-    associatedtype Field: Streamable, Equatable
+public typealias Field<Type> = TLV<Type, UInt32>
+
+public protocol Row: class {
+
+    associatedtype `Type`: Streamable, Equatable
+
+    static var End: Type { get }
+
+    var fields: [Field<Type>] { get set }
 
     init()
-
-    var fields: [TLV<Field, UInt32>] { get set }
-
-    static var End: Field { get }
 }
 
 extension Row {
 
-    public subscript (_ field: Field) -> Bytes? {
-        get { fields.first(where: { $0.type == field })?.value }
+    public subscript(_ type: Type) -> Bytes? {
+        get { fields.first(where: { $0.type == type })?.value }
         set {
-            fields.removeAll(where: { $0.type == field })
+            fields.removeAll(where: { $0.type == type })
             guard let value = newValue else { return }
-            let tlv = TLV<Field, UInt32>(type: field, value: value)
+            let tlv = Field(type: type, value: value)
             fields.insert(tlv, at: 0)
         }
     }
 
-    public subscript <T>(_ field: Field) -> T? where T: BytesRepresentable {
+    public func set(_ field: Field<Type>) {
+        fields.removeAll(where: { $0.type == field.type })
+        fields.insert(field, at: 0)
+    }
+
+    public subscript<T>(_ type: Type) -> T? where T: BytesRepresentable {
         get {
-            guard let bytes = self[field] else { return nil }
+            guard let bytes = self[type] else { return nil }
             return try? T(bytes)
         }
-        set { self[field] = newValue?.bytes }
+        set { self[type] = newValue?.bytes }
+    }
+
+    public func remove(_ type: Type) {
+        fields.removeAll(where: { $0.type == type })
     }
 }
 
@@ -55,7 +67,7 @@ extension Readable where Self: Row {
     public init(from input: Input) throws {
         self.init()
         while true {
-            let field: TLV<Field, UInt32> = try input.read()
+            let field = try input.read() as Field<Type>
             guard field.type != Self.End else { break }
             fields.append(field)
         }
@@ -67,7 +79,7 @@ extension Writable where Self: Row {
 
     public func write(to output: Output) throws {
         try output.write(fields)
-        let end = TLV<Field, UInt32>(type: Self.End, value: [])
+        let end = Field(type: Self.End, value: [])
         try output.write(end)
     }
     
@@ -75,19 +87,18 @@ extension Writable where Self: Row {
 
 extension Sequence where Element: Row {
 
-    public func first<T>(where field: Element.Field, _ predicate: (T) throws -> Bool) throws -> Element? where T: BytesRepresentable {
+    public func first<T>(where type: Element.`Type`, _ predicate: (T) throws -> Bool) throws -> Element? where T: BytesRepresentable {
         return try first(where: {
-            guard let bytes = $0[field] else { return false }
+            guard let bytes = $0[type] else { return false }
             return try predicate(try T(bytes))
         })
     }
 
-    public func sorted<T>(field: Element.Field, by areInIncreasingOrder: (T, T) throws -> Bool) throws -> [Self.Element] where T: BytesRepresentable {
+    public func sorted<T>(field: Element.`Type`, by areInIncreasingOrder: (T, T) throws -> Bool) throws -> [Self.Element] where T: BytesRepresentable {
         return try sorted(by: {
             guard let rhs = $0[field], let lhs = $1[field] else { return false }
             return try areInIncreasingOrder(try T(rhs), try T(lhs))
         })
     }
 
-    
 }

@@ -27,7 +27,7 @@ public class Database {
 
     let header: Header
 
-    public private(set) var root: Group!
+    public let root: Group
 
     public required init(from input: Input, compositeKey: CompositeKey) throws {
         header = try input.read()
@@ -52,7 +52,7 @@ public class Database {
         }
 
         let stream = Input(bytes: content)
-        self.root = try tree(from: stream)
+        self.root = try Root(from: stream, groups: Int(header.groups), entries: Int(header.entries))
     }
 
     public convenience init(from file: URL, compositeKey: CompositeKey) throws {
@@ -79,46 +79,42 @@ extension Database: Writable {
 
 }
 
-extension Database {
+private func Root(from input: Input, groups: Int, entries: Int) throws -> Group {
 
-    private func tree(from input: Input) throws -> Group {
+    let groups: [Group] = try input.read(maxLenght: groups)
+    let entries: [Entry] = try input.read(maxLenght: entries)
 
-        let groups: [Group] = try input.read(maxLenght: Int(header.groups))
-        let entries: [Entry] = try input.read(maxLenght: Int(header.entries))
+    let root = Group()
 
-        let root = Group()
+    for (i, group) in groups.enumerated() {
 
-        for (i, group) in groups.enumerated() {
+        guard let level1: UInt16 = group[.groupLevel] else { throw KDBError.corruptedDatabase }
 
-            guard let level1: UInt16 = group[.groupLevel] else { throw KDBError.corruptedDatabase }
-
-            if level1 == 0 {
-                root.childs.append(group)
-                continue
-            }
-
-            for (j, parent) in groups[0..<i].enumerated().reversed() {
-                guard let level2: UInt16 = parent[.groupLevel] else { throw KDBError.corruptedDatabase }
-
-                if level2 < level1 {
-                    guard (level1 - level2) == 1 else { throw KDBError.corruptedDatabase }
-                    parent.childs.append(group)
-                    break
-                }
-
-                guard j > 0 else { throw KDBError.corruptedDatabase }
-            }
-
+        if level1 == 0 {
+            root.childs.append(group)
+            continue
         }
 
-        for entry in entries {
-            guard let groupID: UInt32 = entry[.groupID] else { throw KDBError.corruptedDatabase }
+        for (j, parent) in groups[0..<i].enumerated().reversed() {
+            guard let level2: UInt16 = parent[.groupLevel] else { throw KDBError.corruptedDatabase }
 
-            let group = try groups.first(where: .groupID, { $0 == groupID }) ?? root
-            group.entries.append(entry)
+            if level2 < level1 {
+                guard (level1 - level2) == 1 else { throw KDBError.corruptedDatabase }
+                parent.childs.append(group)
+                break
+            }
+
+            guard j > 0 else { throw KDBError.corruptedDatabase }
         }
 
-        return root
     }
 
+    for entry in entries {
+        guard let groupID: UInt32 = entry[.groupID] else { throw KDBError.corruptedDatabase }
+
+        let group = try groups.first(where: .groupID, { $0 == groupID }) ?? root
+        group.add(entry)
+    }
+
+    return root
 }
