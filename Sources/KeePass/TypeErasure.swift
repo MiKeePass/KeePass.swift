@@ -32,20 +32,15 @@ internal class _AnyDatabaseBoxBase: Database {
 internal final class _AnyDatabaseBox<Base>: _AnyDatabaseBoxBase where Base: Database {
     internal override var root: AnyGroup { AnyGroup( _base.root ) }
     internal var _base: Base
-    internal init(_ base: Base) {
-        self._base = base
-    }
+    internal init(_ base: Base) { _base = base }
 }
 
 public class AnyDatabase: Database {
-
     public var root: AnyGroup { _box.root }
-
     internal let _box: _AnyDatabaseBoxBase
     internal init<T>(_ base: T) where T: Database {
         _box = _AnyDatabaseBox(base)
     }
-    
 }
 
 // MARK: - Group
@@ -82,9 +77,7 @@ internal final class _AnyGroupBox<Base>: _AnyGroupBoxBase where Base: Group {
     internal override var groups: AnyRandomAccessCollection<AnyGroup> { AnyRandomAccessCollection<AnyGroup>(_base.groups.map { AnyGroup($0) }) }
 
     internal var _base: Base
-    internal init(_ base: Base) {
-        self._base = base
-    }
+    internal init(_ base: Base) { _base = base }
 }
 
 public class AnyGroup: Group {
@@ -106,82 +99,27 @@ public class AnyGroup: Group {
     internal init<T>(_ base: T) where T: Group {
         _box = _AnyGroupBox(base)
     }
-
 }
 
 // MARK: - Entry
 
 internal class _AnyEntryBoxBase: Entry {
-    internal subscript(position: Int) -> Field { _abstract() }
-    internal var startIndex: Int { _abstract() }
-    internal var endIndex: Int { _abstract() }
-    internal func index(after i: Int) -> Int { _abstract() }
-    internal func index(before i: Int) -> Int { _abstract() }
+    internal var fields: AnyRandomAccessCollection<Field> { _abstract() }
     internal func set(_ field: Field) { _abstract() }
 }
 
 internal final class _AnyEntryBox<Base>: _AnyEntryBoxBase where Base: Entry {
-
-    internal override subscript(position: Int) -> Element {
-        _base[position]
-    }
-
-    internal override var startIndex: Int {
-        _base.startIndex
-    }
-
-    internal override var endIndex: Int {
-        _base.endIndex
-    }
-
-    internal override func index(after i: Int) -> Int {
-        _base.index(after: i)
-    }
-
-    internal override func index(before i: Int) -> Int {
-        _base.index(before: i)
-    }
-
-    internal override func set(_ field: Element) {
-        _base.set(field)
-    }
-
+    internal override var fields: AnyRandomAccessCollection<Field> { AnyRandomAccessCollection<Field>(_base.fields) }
+    internal override func set(_ field: Field) { _base.set(field) }
     internal var _base: Base
-    internal init(_ base: Base) {
-        self._base = base
-    }
-
+    internal init(_ base: Base) { _base = base }
 }
 
 public final class AnyEntry: Entry {
-
-    public subscript(position: Int) -> Field {
-        _box[position]
-    }
-
-    public var startIndex: Int {
-        _box.startIndex
-    }
-
-    public var endIndex: Int {
-        _box.endIndex
-    }
-
-    public func index(after i: Int) -> Int {
-        _box.index(after: i)
-    }
-
-    public func index(before i: Int) -> Int {
-        _box.index(before: i)
-    }
-
-    public func set(_ field: Field) {
-        _box.set(field)
-    }
-
+    public var fields: AnyRandomAccessCollection<Field> { _box.fields }
+    public func set(_ field: Field) { _box.set(field) }
     internal let _box: _AnyEntryBoxBase
     internal init<T>(_ base: T) where T: Entry {
         _box = _AnyEntryBox(base)
     }
-
 }

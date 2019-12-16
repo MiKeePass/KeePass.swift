@@ -24,7 +24,7 @@ extension KDB.Database: Database {
 
 }
 
-extension KDB.Field where Type == KDB.Entry.`Type` {
+extension KDB.Property where Type == KDB.Entry.`Type` {
 
     init?(_ field: Field) {
 
@@ -53,38 +53,21 @@ extension KDB.Field where Type == KDB.Entry.`Type` {
 extension KDB.Group: Group {
 
     public var title: String {
-        get { self[.name] ?? "" }
-        set { self[.name] = newValue }
-    }
-
-    public var icon: Int {
-        get { self[.iconID] ?? 0 }
-        set { self[.iconID] = newValue }
+        get { name }
+        set { name = newValue }
     }
 
     public var groups: [KDB.Group] { childs }
 }
 
 extension KDB.Entry: Entry {
-
-    public subscript(position: Int) -> Field {
-        Field( fields[position] )
-    }
-
-    public var startIndex: Int {
-        fields.startIndex
-    }
-
-    public var endIndex: Int {
-        fields.endIndex
-    }
-
-    public func index(after i: Int) -> Int {
-        fields.index(after: i)
+    
+    public var fields: [Field] {
+        properties.compactMap { Field($0) }
     }
 
     public func set(_ field: Field) {
-        guard let field = KDB.Field(field) else { return }
+        guard let field = KDB.Property(field) else { return }
         set(field)
     }
 
@@ -92,7 +75,7 @@ extension KDB.Entry: Entry {
 
 extension Field {
 
-    init(_ field: KDB.Field<KDB.Entry.`Type`>) {
+    init?(_ field: KDB.Property<KDB.Entry.`Type`>) {
 
         switch field.type {
         case .title:
@@ -116,9 +99,7 @@ extension Field {
             isReadeOnly = false
             isProtected = false
         default:
-            name = ""
-            isReadeOnly = true
-            isProtected = false
+            return nil
         }
 
         value = try? field.get()

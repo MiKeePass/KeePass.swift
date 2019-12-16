@@ -24,13 +24,18 @@ public let EntryFieldPassword = "Password"
 public let EntryFieldURL      = "URL"
 public let EntryFieldNotes    = "Notes"
 
-public protocol Entry: RandomAccessCollection where Element == Field, Index == Int {
-    mutating func set(_ field: Element)
+public protocol Entry {
+
+    associatedtype Fields: RandomAccessCollection where Fields.Element == Field
+
+    var fields: Fields { get }
+    
+    mutating func set(_ field: Fields.Element)
 }
 
 extension Entry {
 
-    subscript(_ field: String) -> Element? {
-        return first(where: { $0.name == field })
+    subscript(_ field: String) -> Fields.Element? {
+        return fields.first(where: { $0.name == field })
     }
 }

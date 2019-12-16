@@ -22,7 +22,7 @@ import XML
 import KDBX
 
 extension KDBX.File: Database {
-    public var root: Element { database.document.root }
+    public var root: Element { database.document.root.KeePassFile.Root }
 }
 
 extension Element {
@@ -49,26 +49,14 @@ extension Field {
 
 extension XML.Element: Entry {
 
+    public var fields: [Field] {
+        allDescendants(where: { $0.name == "String" }).map { Field($0) }
+    }
+
     public func set(_ field: Field) {
         allDescendants(where: { $0.name == field.name })
             .forEach { $0.removeFromParent() }
         addChild( XML.Element(field) )
-    }
-
-    public subscript(position: Int) -> Field {
-        Field( children[position] )
-    }
-
-    public func index(after i: Int) -> Int {
-        children.index(after: i)
-    }
-
-    public var startIndex: Int {
-        children.startIndex
-    }
-
-    public var endIndex: Int {
-        children.endIndex
     }
 }
 
