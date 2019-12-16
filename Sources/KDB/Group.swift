@@ -39,20 +39,49 @@ public final class Group: Row, Streamable {
 
     var parent: Group?
 
-    public var fields: [Field<Type>]
+    public var properties: [Property<Type>]
 
     public var childs: [Group]
 
     public var entries: [Entry]
 
     public required init() {
-        fields = []
+        properties = []
         childs = []
         entries = []
     }
 }
 
 extension Group {
+
+    public var name: String {
+        get { self[.name] ?? "" }
+        set { self[.name] = newValue }
+    }
+
+    public var level: Int {
+        get { self[.groupLevel] ?? 0 }
+        set { self[.groupLevel] = newValue }
+    }
+
+    public var icon: Int {
+        get { self[.iconID] ?? 0 }
+        set { self[.iconID] = newValue }
+    }
+
+    public var creationDate: Date {
+        date(at: .creationTime) ?? Date.distantPast
+    }
+
+    public var lastModifiedDate: Date {
+        get { date(at: .lastModifiedTime) ?? Date.distantPast }
+        set { set(newValue, at: .lastModifiedTime) }
+    }
+
+    public var lastAccessDate: Date {
+        get { date(at: .lastAccessTime) ?? Date.distantPast }
+        set { set(newValue, at: .lastAccessTime) }
+    }
 
     public func removeFromParent() {
         parent?.childs.removeAll(where: { $0 == self })
@@ -67,6 +96,7 @@ extension Group {
     public func add(_ group: Group) {
         group.removeFromParent()
         childs.append(group)
+        group.level = level + 1
     }
 }
 
@@ -78,8 +108,9 @@ extension Group: Hashable {
     }
 
     public func hash(into hasher: inout Hasher) {
+        if let groupID = self[.groupID] { hasher.combine(groupID) }
+        if let name = self[.name] { hasher.combine(name) }
         if let groupLevel = self[.groupLevel] { hasher.combine(groupLevel) }
-        if let groupFlags = self[.groupFlags] { hasher.combine(groupFlags) }
     }
 
 }

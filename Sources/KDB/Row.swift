@@ -19,7 +19,7 @@
 import Foundation
 import Binary
 
-public typealias Field<Type> = TLV<Type, UInt32>
+public typealias Property<Type> = TLV<Type, UInt32>
 
 public protocol Row: class {
 
@@ -27,7 +27,7 @@ public protocol Row: class {
 
     static var End: Type { get }
 
-    var fields: [Field<Type>] { get set }
+    var properties: [Property<Type>] { get set }
 
     init()
 }
@@ -35,18 +35,27 @@ public protocol Row: class {
 extension Row {
 
     public subscript(_ type: Type) -> Bytes? {
-        get { fields.first(where: { $0.type == type })?.value }
+        get { properties.first(where: { $0.type == type })?.value }
         set {
-            fields.removeAll(where: { $0.type == type })
+            properties.removeAll(type)
             guard let value = newValue else { return }
-            let tlv = Field(type: type, value: value)
-            fields.insert(tlv, at: 0)
+            let tlv = Property(type: type, value: value)
+            properties.insert(tlv, at: 0)
         }
     }
 
-    public func set(_ field: Field<Type>) {
-        fields.removeAll(where: { $0.type == field.type })
-        fields.insert(field, at: 0)
+    public func set(_ field: Property<Type>) {
+        properties.removeAll(field.type)
+        properties.insert(field, at: 0)
+    }
+
+    public func set(_ date: Date, at type: Type) {
+        self[type] = Database.bytes(from: date)
+    }
+
+    public func date(at type: Type) -> Date? {
+        guard let bytes = self[type] else { return nil }
+        return Database.date(from: bytes)
     }
 
     public subscript<T>(_ type: Type) -> T? where T: BytesRepresentable {
@@ -58,7 +67,7 @@ extension Row {
     }
 
     public func remove(_ type: Type) {
-        fields.removeAll(where: { $0.type == type })
+        properties.removeAll(type)
     }
 }
 
@@ -67,9 +76,9 @@ extension Readable where Self: Row {
     public init(from input: Input) throws {
         self.init()
         while true {
-            let field = try input.read() as Field<Type>
+            let field = try input.read() as Property<Type>
             guard field.type != Self.End else { break }
-            fields.append(field)
+            properties.append(field)
         }
     }
 
@@ -78,8 +87,8 @@ extension Readable where Self: Row {
 extension Writable where Self: Row {
 
     public func write(to output: Output) throws {
-        try output.write(fields)
-        let end = Field(type: Self.End, value: [])
+        try output.write(properties)
+        let end = Property(type: Self.End, value: [])
         try output.write(end)
     }
     

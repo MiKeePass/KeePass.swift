@@ -64,14 +64,28 @@ public final class Entry: Row, Streamable {
 
     var parent: Group?
 
-    public var fields: [Field<Type>]
+    public var properties: [Property<Type>]
 
     public required init() {
-        fields = []
+        properties = []
     }    
 }
 
 extension Entry {
+
+    public var creationDate: Date {
+        date(at: .creationTime) ?? Date.distantPast
+    }
+
+    public var lastModifiedDate: Date {
+        get { date(at: .lastModifiedTime) ?? Date.distantPast }
+        set { set(newValue, at: .lastModifiedTime) }
+    }
+
+    public var lastAccessDate: Date {
+        get { date(at: .lastAccessTime) ?? Date.distantPast }
+        set { set(newValue, at: .lastAccessTime) }
+    }
 
     var isMetaEntry: Bool {
         return false
@@ -79,7 +93,7 @@ extension Entry {
 
     public func removeFromParent() {
         parent?.entries.removeAll(where: { $0 == self })
-        fields.removeAll(.groupID)
+        self[.groupID] = -1
     }
 }
 
