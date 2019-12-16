@@ -36,6 +36,11 @@ public class File {
 
     public let database: Database & Writable
 
+    public required init(from input: Input) throws {
+        version = Version(major: 0, minor: 0)
+        database = try Database0(from: input)
+    }
+
     public required init(from input: Input, compositeKey: CompositeKey) throws {
         version = try input.read()
 
@@ -44,6 +49,12 @@ public class File {
         } else {
             database = try Database3(from: input, compositeKey: compositeKey)
         }
+    }
+
+    public convenience init(xml file: URL) throws {
+        let bytes = try Bytes(contentsOf: file)
+        let stream = Input(bytes: bytes)
+        try self.init(from: stream)
     }
 
     public convenience init(from file: URL, compositeKey: CompositeKey) throws {
