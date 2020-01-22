@@ -79,19 +79,5 @@ let package = Package(
         .target(
             name: "Twofish",
             dependencies: []),
-        
-        // MARK: Test Targets
-
-        .testTarget(
-            name: "KeePassTests",
-            dependencies: ["KeePass"]),
-
-        .testTarget(
-            name: "BinaryTests",
-            dependencies: ["Binary"]),
-
-        .testTarget(
-            name: "CryptoTests",
-            dependencies: ["Crypto"]),
     ]
 )

@@ -50,4 +50,8 @@ public class KeePass {
         }
     }
 
+    public static func open(contentOf xml: URL) throws -> AnyDatabase {
+        return AnyDatabase ( try KDBX.File(xml: xml) )
+    }
+
 }

@@ -1,4 +1,4 @@
-// Entry.swift
+// Timestamp.swift
 // This file is part of KeePass.
 //
 // Copyright © 2019 Maxime Epain. All rights reserved.
@@ -18,26 +18,9 @@
 
 import Foundation
 
-public let EntryFieldTitle    = "Title"
-public let EntryFieldUserName = "UserName"
-public let EntryFieldPassword = "Password"
-public let EntryFieldURL      = "URL"
-public let EntryFieldNotes    = "Notes"
-
-public protocol Entry {
-
-    associatedtype Fields: RandomAccessCollection where Fields.Element == Field
-
-    var times: Timestamp { get }
-
-    var fields: Fields { get }
-    
-    mutating func set(_ field: Fields.Element)
-}
-
-extension Entry {
-
-    subscript(_ field: String) -> Fields.Element? {
-        return fields.first(where: { $0.name == field })
-    }
+public protocol Timestamp {
+    var creationDate: Date { get }
+    var lastModifiedDate: Date { get set }
+    var lastAccessDate: Date { get set }
+    var expirationDate: Date? { get set }
 }

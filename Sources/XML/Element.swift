@@ -69,12 +69,22 @@ open class Element {
     }
 
     public subscript(dynamicMember member: String) -> Element {
-        return self[member]
+        self[member]
     }
 
     open func get<T>() throws -> T where T: LosslessStringConvertible {
         guard let string = value, let value = T(string) else { throw XMLError.valueConversionFailed }
         return value
+    }
+
+    open func date(formatter: DateFormatter) -> Date? {
+        guard let value = value else { return nil }
+        return formatter.date(from: value)
+    }
+
+    open func date(formatter: ISO8601DateFormatter = ISO8601DateFormatter()) -> Date? {
+        guard let value = value else { return nil }
+        return formatter.date(from: value)
     }
     
     /// Returns all of the elements with equal name as `self` **(nil if not exists)**.

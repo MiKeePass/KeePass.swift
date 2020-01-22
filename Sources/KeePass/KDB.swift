@@ -61,6 +61,10 @@ extension KDB.Group: Group {
 }
 
 extension KDB.Entry: Entry {
+
+    public var times: Timestamp {
+         return self
+    }
     
     public var fields: [Field] {
         properties.compactMap { Field($0) }
@@ -73,6 +77,15 @@ extension KDB.Entry: Entry {
 
 }
 
+extension KDB.Entry: Timestamp {
+
+    public var expirationDate: Date? {
+        get { nil }
+        set { }
+    }
+
+}
+
 extension Field {
 
     init?(_ field: KDB.Property<KDB.Entry.`Type`>) {
@@ -80,28 +93,19 @@ extension Field {
         switch field.type {
         case .title:
             name = EntryFieldTitle
-            isReadeOnly = false
-            isProtected = false
         case .url:
             name = EntryFieldURL
-            isReadeOnly = false
-            isProtected = false
         case .username:
             name = EntryFieldUserName
-            isReadeOnly = false
-            isProtected = false
         case .password:
             name = EntryFieldPassword
-            isReadeOnly = false
-            isProtected = true
         case .notes:
             name = EntryFieldNotes
-            isReadeOnly = false
-            isProtected = false
         default:
             return nil
         }
 
         value = try? field.get()
+        isProtected = field.type == .password
     }
 }

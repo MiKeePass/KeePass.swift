@@ -32,8 +32,8 @@ extension AESKeyDerivation {
 
     convenience init(parameters: [String: Variant]) throws {
         guard
-            let seed = parameters[AESKeyDerivation.TransformSeedKey],
-            let rounds = parameters[AESKeyDerivation.TransformRoundsKey]
+            let seed    = parameters[AESKeyDerivation.TransformSeedKey],
+            let rounds  = parameters[AESKeyDerivation.TransformRoundsKey]
         else { throw KDBXError.corruptedDatabase }
 
         try self.init(seed: try seed.unwrap(),
@@ -54,11 +54,11 @@ extension Argon2 {
     
     convenience init(parameters: [String: Variant]) throws {
         guard
-            let salt = parameters[Argon2.SaltKey],
+            let salt        = parameters[Argon2.SaltKey],
             let parallelism = parameters[Argon2.ParallelismKey],
-            let memory = parameters[Argon2.MemoryKey],
-            let iterations = parameters[Argon2.IterationsKey],
-            let version = parameters[Argon2.VersionKey]
+            let memory      = parameters[Argon2.MemoryKey],
+            let iterations  = parameters[Argon2.IterationsKey],
+            let version     = parameters[Argon2.VersionKey]
         else { throw KDBXError.corruptedDatabase }
 
         self.init(salt:         try salt.unwrap(),

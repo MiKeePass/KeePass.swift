@@ -104,11 +104,13 @@ public class AnyGroup: Group {
 // MARK: - Entry
 
 internal class _AnyEntryBoxBase: Entry {
+    internal var times: Timestamp { _abstract() }
     internal var fields: AnyRandomAccessCollection<Field> { _abstract() }
     internal func set(_ field: Field) { _abstract() }
 }
 
 internal final class _AnyEntryBox<Base>: _AnyEntryBoxBase where Base: Entry {
+    internal override var times: Timestamp { _base.times }
     internal override var fields: AnyRandomAccessCollection<Field> { AnyRandomAccessCollection<Field>(_base.fields) }
     internal override func set(_ field: Field) { _base.set(field) }
     internal var _base: Base
@@ -116,6 +118,7 @@ internal final class _AnyEntryBox<Base>: _AnyEntryBoxBase where Base: Entry {
 }
 
 public final class AnyEntry: Entry {
+    public var times: Timestamp { _box.times }
     public var fields: AnyRandomAccessCollection<Field> { _box.fields }
     public func set(_ field: Field) { _box.set(field) }
     internal let _box: _AnyEntryBoxBase

@@ -21,6 +21,8 @@ import Binary
 import XML
 import KDBX
 
+let DateFormatter = ISO8601DateFormatter()
+
 extension KDBX.File: Database {
     public var root: Element { database.document.root.KeePassFile.Root }
 }
@@ -39,18 +41,21 @@ extension XML.Element {
 
 extension Field {
 
-    init(_ element: XML.Element) {
-        name = element.name
-        value = element.value
-        isProtected = false
-        isReadeOnly = false
+    init?(_ element: XML.Element) {
+        guard let key = element.Key.value else { return nil}
+        name = key
+
+        value = element.Value.value
+        isProtected = element.Value.attributes["Protected"] == "True"
     }
 }
 
 extension XML.Element: Entry {
 
+    public var times: Timestamp { self.Times }
+
     public var fields: [Field] {
-        allDescendants(where: { $0.name == "String" }).map { Field($0) }
+        allDescendants(where: { $0.name == "String" }).compactMap { Field($0) }
     }
 
     public func set(_ field: Field) {
@@ -58,6 +63,37 @@ extension XML.Element: Entry {
             .forEach { $0.removeFromParent() }
         addChild( XML.Element(field) )
     }
+}
+
+extension XML.Element: Timestamp {
+
+    public var creationDate: Date {
+        self.CreationTime.date(formatter: DateFormatter) ?? .distantPast
+    }
+
+    public var lastModifiedDate: Date {
+        get { self.LastModificationTime.date(formatter: DateFormatter) ?? .distantPast }
+        set { self.LastModificationTime.value = DateFormatter.string(from: newValue) }
+    }
+
+    public var lastAccessDate: Date {
+        get { self.LastAccessTime.date(formatter: DateFormatter) ?? .distantPast }
+        set { self.LastAccessTime.value = DateFormatter.string(from: newValue) }
+    }
+
+    public var expirationDate: Date? {
+        get { self.ExpiryTime.date(formatter: DateFormatter) }
+        set {
+            if let value = newValue {
+                self.ExpiryTime.value = DateFormatter.string(from: value)
+                addChild(name: "Expires", value: "True")
+            } else {
+                self.ExpiryTime.value = DateFormatter.string(from: Date.distantFuture)
+                addChild(name: "Expires", value: "False")
+            }
+        }
+    }
+
 }
 
 extension XML.Element: Group {
@@ -76,11 +112,11 @@ extension XML.Element: Group {
     }
 
     public var entries: [Element] {
-        allDescendants(where: { $0.name == "Entry"})
+        allDescendants(where: { $0.name == "Entry" })
     }
 
     public var groups: [Element] {
-        allDescendants(where: { $0.name == "Group"})
+        allDescendants(where: { $0.name == "Group" })
     }
 
 }
