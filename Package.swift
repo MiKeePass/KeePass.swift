@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "KeePass",
+    platforms: [.iOS(.v13), .macOS(.v10_12)],
 
     products: [
         // The `Binary` manipulate bytes with ease.
@@ -46,6 +47,9 @@ let package = Package(
         .target(
             name: "Binary",
             dependencies: []),
+        .testTarget(
+            name: "BinaryTests",
+            dependencies: ["Binary"]),
 
         .target(
             name: "Crypto",
