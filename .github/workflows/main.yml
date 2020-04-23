@@ -13,7 +13,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Build
       run: swift build
+
     - name: Run tests
       run: swift test --enable-code-coverage
+
+    - name: Get test coverage
+      uses: ./.github/actions/spm-lcov-action
+      with:
+        output-file: ./coverage/lcov.info
+
+    - name: Report test coverage
+      uses: romeovs/lcov-reporter-action@v0.2.16
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        lcov-file: ./coverage/lcov.info
