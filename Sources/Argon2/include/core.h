@@ -77,9 +77,9 @@ typedef struct Argon2_instance_t {
     uint32_t lane_length;
     uint32_t lanes;
     uint32_t threads;
-    argon2_type type;
+    argon2_type_t type;
     int print_internals; /* whether to print the memory blocks */
-    argon2_context *context_ptr; /* points back to original context */
+    argon2_context_t *context_ptr; /* points back to original context */
 } argon2_instance_t;
 
 /*
@@ -109,7 +109,7 @@ typedef struct Argon2_thread_data {
  * @param num the number of elements to be allocated
  * @return ARGON2_OK if @memory is a valid pointer and memory is allocated
  */
-int allocate_memory(const argon2_context *context, uint8_t **memory,
+int allocate_memory(const argon2_context_t *context, uint8_t **memory,
                     size_t num, size_t size);
 
 /*
@@ -120,7 +120,7 @@ int allocate_memory(const argon2_context *context, uint8_t **memory,
  * @param size the size in bytes for each element to be deallocated
  * @param num the number of elements to be deallocated
  */
-void free_memory(const argon2_context *context, uint8_t *memory,
+void free_memory(const argon2_context_t *context, uint8_t *memory,
                  size_t num, size_t size);
 
 /* Function that securely cleans the memory. This ignores any flags set
@@ -158,7 +158,7 @@ uint32_t index_alpha(const argon2_instance_t *instance,
  * @return ARGON2_OK if everything is all right, otherwise one of error codes
  * (all defined in <argon2.h>
  */
-int validate_inputs(const argon2_context *context);
+int validate_inputs(const argon2_context_t *context);
 
 /*
  * Hashes all the inputs into @a blockhash[PREHASH_DIGEST_LENGTH], clears
@@ -170,8 +170,8 @@ int validate_inputs(const argon2_context *context);
  * @pre    @a blockhash must have at least @a PREHASH_DIGEST_LENGTH bytes
  * allocated
  */
-void initial_hash(uint8_t *blockhash, argon2_context *context,
-                  argon2_type type);
+void initial_hash(uint8_t *blockhash, argon2_context_t *context,
+                  argon2_type_t type);
 
 /*
  * Function creates first 2 blocks per lane
@@ -191,7 +191,7 @@ void fill_first_blocks(uint8_t *blockhash, const argon2_instance_t *instance);
  * @return Zero if successful, -1 if memory failed to allocate. @context->state
  * will be modified if successful.
  */
-int initialize(argon2_instance_t *instance, argon2_context *context);
+int initialize(argon2_instance_t *instance, argon2_context_t *context);
 
 /*
  * XORing the last block of each lane, hashing it, making the tag. Deallocates
@@ -204,7 +204,7 @@ int initialize(argon2_instance_t *instance, argon2_context *context);
  * @pre if context->free_cbk is not NULL, it should point to a function that
  * deallocates memory
  */
-void finalize(const argon2_context *context, argon2_instance_t *instance);
+void finalize(const argon2_context_t *context, argon2_instance_t *instance);
 
 /*
  * Function that fills the segment using previous segments also from other

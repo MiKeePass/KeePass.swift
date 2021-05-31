@@ -255,7 +255,7 @@ static const char *decode_decimal(const char *str, unsigned long *v) {
  * when it is fed into decode_string.
  */
 
-int decode_string(argon2_context *ctx, const char *str, argon2_type type) {
+int decode_string(argon2_context_t *ctx, const char *str, argon2_type_t type) {
 
 /* check for prefix */
 #define CC(prefix)                                                             \
@@ -318,7 +318,7 @@ int decode_string(argon2_context *ctx, const char *str, argon2_type type) {
     const char* type_string;
 
     /* We should start with the argon2_type we are using */
-    type_string = argon2_type2string(type, 0);
+    type_string = kp_argon2_type2string(type, 0);
     if (!type_string) {
         return ARGON2_INCORRECT_TYPE;
     }
@@ -370,8 +370,8 @@ int decode_string(argon2_context *ctx, const char *str, argon2_type type) {
 #undef BIN
 }
 
-int encode_string(char *dst, size_t dst_len, argon2_context *ctx,
-                  argon2_type type) {
+int encode_string(char *dst, size_t dst_len, argon2_context_t *ctx,
+                  argon2_type_t type) {
 #define SS(str)                                                                \
     do {                                                                       \
         size_t pp_len = strlen(str);                                           \
@@ -400,7 +400,7 @@ int encode_string(char *dst, size_t dst_len, argon2_context *ctx,
         dst_len -= sb_len;                                                     \
     } while ((void)0, 0)
 
-    const char* type_string = argon2_type2string(type, 0);
+    const char* type_string = kp_argon2_type2string(type, 0);
     int validation_result = validate_inputs(ctx);
 
     if (!type_string) {

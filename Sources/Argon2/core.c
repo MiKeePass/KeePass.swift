@@ -86,7 +86,7 @@ static void store_block(void *output, const block *src) {
 
 /***************Memory functions*****************/
 
-int allocate_memory(const argon2_context *context, uint8_t **memory,
+int allocate_memory(const argon2_context_t *context, uint8_t **memory,
                     size_t num, size_t size) {
     size_t memory_size = num*size;
     if (memory == NULL) {
@@ -112,7 +112,7 @@ int allocate_memory(const argon2_context *context, uint8_t **memory,
     return ARGON2_OK;
 }
 
-void free_memory(const argon2_context *context, uint8_t *memory,
+void free_memory(const argon2_context_t *context, uint8_t *memory,
                  size_t num, size_t size) {
     size_t memory_size = num*size;
     clear_internal_memory(memory, memory_size);
@@ -152,7 +152,7 @@ void clear_internal_memory(void *v, size_t n) {
   }
 }
 
-void finalize(const argon2_context *context, argon2_instance_t *instance) {
+void finalize(const argon2_context_t *context, argon2_instance_t *instance) {
     if (context != NULL && instance != NULL) {
         block blockhash;
         uint32_t l;
@@ -170,7 +170,7 @@ void finalize(const argon2_context *context, argon2_instance_t *instance) {
         {
             uint8_t blockhash_bytes[ARGON2_BLOCK_SIZE];
             store_block(blockhash_bytes, &blockhash);
-            blake2b_long(context->out, context->outlen, blockhash_bytes,
+            kp_blake2b_long(context->out, context->outlen, blockhash_bytes,
                          ARGON2_BLOCK_SIZE);
             /* clear blockhash and blockhash_bytes */
             clear_internal_memory(blockhash.v, ARGON2_BLOCK_SIZE);
@@ -318,7 +318,7 @@ static int fill_memory_blocks_mt(argon2_instance_t *instance) {
 
                 /* 2.1 Join a thread if limit is exceeded */
                 if (l >= instance->threads) {
-                    if (argon2_thread_join(thread[l - instance->threads])) {
+                    if (kp_argon2_thread_join(thread[l - instance->threads])) {
                         rc = ARGON2_THREAD_FAIL;
                         goto fail;
                     }
@@ -333,11 +333,11 @@ static int fill_memory_blocks_mt(argon2_instance_t *instance) {
                     instance; /* preparing the thread input */
                 memcpy(&(thr_data[l].pos), &position,
                        sizeof(argon2_position_t));
-                if (argon2_thread_create(&thread[l], &fill_segment_thr,
+                if (kp_argon2_thread_create(&thread[l], &fill_segment_thr,
                                          (void *)&thr_data[l])) {
                     /* Wait for already running threads */
                     for (ll = 0; ll < l; ++ll)
-                        argon2_thread_join(thread[ll]);
+                        kp_argon2_thread_join(thread[ll]);
                     rc = ARGON2_THREAD_FAIL;
                     goto fail;
                 }
@@ -349,7 +349,7 @@ static int fill_memory_blocks_mt(argon2_instance_t *instance) {
             /* 3. Joining remaining threads */
             for (l = instance->lanes - instance->threads; l < instance->lanes;
                  ++l) {
-                if (argon2_thread_join(thread[l])) {
+                if (kp_argon2_thread_join(thread[l])) {
                     rc = ARGON2_THREAD_FAIL;
                     goto fail;
                 }
@@ -385,7 +385,7 @@ int fill_memory_blocks(argon2_instance_t *instance) {
 #endif
 }
 
-int validate_inputs(const argon2_context *context) {
+int validate_inputs(const argon2_context_t *context) {
     if (NULL == context) {
         return ARGON2_INCORRECT_PARAMETER;
     }
@@ -521,13 +521,13 @@ void fill_first_blocks(uint8_t *blockhash, const argon2_instance_t *instance) {
 
         store32(blockhash + ARGON2_PREHASH_DIGEST_LENGTH, 0);
         store32(blockhash + ARGON2_PREHASH_DIGEST_LENGTH + 4, l);
-        blake2b_long(blockhash_bytes, ARGON2_BLOCK_SIZE, blockhash,
+        kp_blake2b_long(blockhash_bytes, ARGON2_BLOCK_SIZE, blockhash,
                      ARGON2_PREHASH_SEED_LENGTH);
         load_block(&instance->memory[l * instance->lane_length + 0],
                    blockhash_bytes);
 
         store32(blockhash + ARGON2_PREHASH_DIGEST_LENGTH, 1);
-        blake2b_long(blockhash_bytes, ARGON2_BLOCK_SIZE, blockhash,
+        kp_blake2b_long(blockhash_bytes, ARGON2_BLOCK_SIZE, blockhash,
                      ARGON2_PREHASH_SEED_LENGTH);
         load_block(&instance->memory[l * instance->lane_length + 1],
                    blockhash_bytes);
@@ -535,8 +535,8 @@ void fill_first_blocks(uint8_t *blockhash, const argon2_instance_t *instance) {
     clear_internal_memory(blockhash_bytes, ARGON2_BLOCK_SIZE);
 }
 
-void initial_hash(uint8_t *blockhash, argon2_context *context,
-                  argon2_type type) {
+void initial_hash(uint8_t *blockhash, argon2_context_t *context,
+                  argon2_type_t type) {
     blake2b_state BlakeHash;
     uint8_t value[sizeof(uint32_t)];
 
@@ -544,31 +544,31 @@ void initial_hash(uint8_t *blockhash, argon2_context *context,
         return;
     }
 
-    blake2b_init(&BlakeHash, ARGON2_PREHASH_DIGEST_LENGTH);
+    kp_blake2b_init(&BlakeHash, ARGON2_PREHASH_DIGEST_LENGTH);
 
     store32(&value, context->lanes);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    kp_blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
     store32(&value, context->outlen);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    kp_blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
     store32(&value, context->m_cost);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    kp_blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
     store32(&value, context->t_cost);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    kp_blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
     store32(&value, context->version);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    kp_blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
     store32(&value, (uint32_t)type);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    kp_blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
     store32(&value, context->pwdlen);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    kp_blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
     if (context->pwd != NULL) {
-        blake2b_update(&BlakeHash, (const uint8_t *)context->pwd,
+        kp_blake2b_update(&BlakeHash, (const uint8_t *)context->pwd,
                        context->pwdlen);
 
         if (context->flags & ARGON2_FLAG_CLEAR_PASSWORD) {
@@ -578,18 +578,18 @@ void initial_hash(uint8_t *blockhash, argon2_context *context,
     }
 
     store32(&value, context->saltlen);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    kp_blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
     if (context->salt != NULL) {
-        blake2b_update(&BlakeHash, (const uint8_t *)context->salt,
+        kp_blake2b_update(&BlakeHash, (const uint8_t *)context->salt,
                        context->saltlen);
     }
 
     store32(&value, context->secretlen);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    kp_blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
     if (context->secret != NULL) {
-        blake2b_update(&BlakeHash, (const uint8_t *)context->secret,
+        kp_blake2b_update(&BlakeHash, (const uint8_t *)context->secret,
                        context->secretlen);
 
         if (context->flags & ARGON2_FLAG_CLEAR_SECRET) {
@@ -599,17 +599,17 @@ void initial_hash(uint8_t *blockhash, argon2_context *context,
     }
 
     store32(&value, context->adlen);
-    blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
+    kp_blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
     if (context->ad != NULL) {
-        blake2b_update(&BlakeHash, (const uint8_t *)context->ad,
+        kp_blake2b_update(&BlakeHash, (const uint8_t *)context->ad,
                        context->adlen);
     }
 
-    blake2b_final(&BlakeHash, blockhash, ARGON2_PREHASH_DIGEST_LENGTH);
+    kp_blake2b_final(&BlakeHash, blockhash, ARGON2_PREHASH_DIGEST_LENGTH);
 }
 
-int initialize(argon2_instance_t *instance, argon2_context *context) {
+int initialize(argon2_instance_t *instance, argon2_context_t *context) {
     uint8_t blockhash[ARGON2_PREHASH_SEED_LENGTH];
     int result = ARGON2_OK;
 
