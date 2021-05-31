@@ -39,15 +39,15 @@ public final class Argon2: KeyDerivation {
     public func derive(key: Bytes) throws -> Bytes {
 
         var out = Bytes(lenght: 32)
-        let result = argon2_hash(iterations,
-                                 memory,
-                                 parallelism,
-                                 key.rawValue, key.lenght,
-                                 salt.rawValue, salt.lenght,
-                                 &out.rawValue, out.lenght,
-                                 nil, 0,
-                                 Argon2_d,
-                                 version)
+        let result = kp_argon2_hash(iterations,
+                                    memory,
+                                    parallelism,
+                                    key.rawValue, key.lenght,
+                                    salt.rawValue, salt.lenght,
+                                    &out.rawValue, out.lenght,
+                                    nil, 0,
+                                    Argon2_d,
+                                    version)
 
         let code = argon2_error_codes(result)
 
