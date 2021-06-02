@@ -103,10 +103,10 @@ public final class AESKeyDerivation: KeyDerivation {
         let cryptor = UnsafeMutablePointer<CCCryptorRef?>.allocate(capacity: 1)
 
         var status = CCCryptorCreate(CCOperation(kCCEncrypt),
-                                     CCAlgorithm(kCCAlgorithmAES128),
+                                     CCAlgorithm(kCCAlgorithmAES),
                                      CCOptions(kCCOptionECBMode),
-                                     key.rawValue,
-                                     key.lenght,
+                                     seed.rawValue,
+                                     seed.lenght,
                                      nil,
                                      cryptor)
 
