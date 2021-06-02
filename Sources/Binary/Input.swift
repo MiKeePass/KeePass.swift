@@ -28,6 +28,8 @@ public class Input {
         bytes.suffix(from: offset)
     }
 
+    public var hasBytesAvailable: Bool { stream.hasBytesAvailable }
+
     private let stream: InputStream
 
     public init(bytes: Bytes) {

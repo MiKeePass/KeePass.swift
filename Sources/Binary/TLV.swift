@@ -31,6 +31,10 @@ public protocol TLVProtocol {
     var value: Value { get set }
 }
 
+public protocol Endable {
+    var isAtEnd: Bool { get }
+}
+
 public struct TLV<Type, Lenght>: TLVProtocol where Lenght: BinaryInteger {
 
     public let type: Type
