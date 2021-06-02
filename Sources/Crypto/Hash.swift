@@ -90,8 +90,7 @@ public final class HMACSHA256 {
         return out
     }
 
-    public init(key: Bytes) throws {
-        guard key.lenght == crypto_auth_hmacsha256_KEYBYTES else { throw CryptoError.invalidKey }
+    public init(key: Bytes) {
         state = crypto_auth_hmacsha256_state()
         crypto_auth_hmacsha256_init(&state, key.rawValue, lenght(key))
     }
@@ -100,12 +99,10 @@ public final class HMACSHA256 {
         crypto_auth_hmacsha256_update(&state, bytes.rawValue, lenght(bytes));
     }
 
-    public static func authenticate(_ bytes: Bytes, key: Bytes) throws -> Bytes {
-        let hmac = try HMACSHA256(key: key)
+    public static func authenticate(_ bytes: Bytes, key: Bytes) -> Bytes {
+        let hmac = HMACSHA256(key: key)
         hmac.update(bytes)
         return hmac.final
     }
 
 }
-
-
