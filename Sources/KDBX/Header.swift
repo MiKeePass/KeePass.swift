@@ -20,11 +20,9 @@ import Foundation
 import Binary
 import Crypto
 
-protocol Header {
-    subscript(_ type: OuterHeader) -> Bytes? { get }
-}
+typealias Header<T, L> = [TLV<T, L>] where L: BinaryInteger
 
-enum OuterHeader: UInt8, Streamable {
+enum OuterHeader: UInt8, Streamable, Endable {
     case end                 = 0
     case comment             = 1
     case cipherID            = 2
@@ -38,13 +36,17 @@ enum OuterHeader: UInt8, Streamable {
     case innerRandomStreamID = 10
     case kdfParameters       = 11
     case publicCustomData    = 12
+
+    var isAtEnd: Bool { self == .end }
 }
 
-enum InnerHeader: UInt8, Streamable {
+enum InnerHeader: UInt8, Streamable, Endable {
     case end                  = 0
     case innerRandomStreamID  = 1
     case innerRandomStreamKey = 2
     case binary               = 3
+
+    var isAtEnd: Bool { self == .end }
 }
 
 enum Compression: UInt32, BytesRepresentable {
@@ -61,17 +63,12 @@ enum RandomStream: UInt32, BytesRepresentable {
     case count      = 4
 }
 
-extension Header {
-
-    subscript<T>(_ type: OuterHeader) -> T? where T: BytesRepresentable {
-        guard let bytes = self[type] else { return nil }
-        return try? T(bytes)
-    }
+extension Array where Element: TLVProtocol, Element.`Type` == OuterHeader, Element.Value == Bytes {
 
     func cipher(key: Bytes) throws -> Cipher {
         guard
             let uuid: UUID = self[.cipherID],
-            let iv = self[.initialVector]
+            let iv: Bytes = self[.initialVector]
         else { throw KDBXError.corruptedDatabase }
 
         switch uuid {
@@ -87,7 +84,10 @@ extension Header {
     }
 
     func masterKey(from compositeKey: CompositeKey) throws -> Bytes {
-        guard let masterSeed = self[.masterSeed] else { throw KDBXError.corruptedDatabase }
+        guard
+            let masterSeed: Bytes = self[.masterSeed]
+        else { throw KDBXError.corruptedDatabase }
+
         let key = try compositeKey.serialize()
 
         // Key Derivation
@@ -115,5 +115,20 @@ extension Header {
         default:
             throw KDBXError.unsupportedKeyDerivation
         }
+    }
+}
+
+extension Array: Readable where Element: TLVProtocol & Readable, Element.`Type`: Endable {
+
+    public init(from input: Input) throws {
+        var fields: [Element] = []
+
+        while true {
+            let field: Element = try input.read()
+            fields.append(field)
+            if field.type.isAtEnd { break }
+        }
+
+        self = fields
     }
 }

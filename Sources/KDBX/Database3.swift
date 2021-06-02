@@ -24,16 +24,16 @@ import XML
 
 class Database3: Database {
 
-    typealias Header = [TLV<OuterHeader, UInt16>]
-
-    let header: Header
+    let header: Header<OuterHeader, UInt16>
 
     let document: Document
 
     required init(from input: Input, compositeKey: CompositeKey) throws {
         header = try input.read()
 
-        guard let startBytes = header[.streamStartBytes] else { throw KDBXError.corruptedDatabase }
+        guard
+            let startBytes: Bytes = header[.streamStartBytes]
+        else { throw KDBXError.corruptedDatabase }
 
         let data = try input.read() as Bytes
 
@@ -47,20 +47,20 @@ class Database3: Database {
 
         guard try stream.read(lenght: SHA256.Lenght) == startBytes else { throw KDBXError.invalidCompositeKey }
 
-        var block: UInt32 = 0
+        var index: UInt32 = 0
         var content = Bytes()
 
         while true {
-            guard try stream.read() == block else { throw KDBXError.corruptedDatabase }
-            block += 1
+            guard try stream.read() == index else { throw KDBXError.corruptedDatabase }
+            index += 1
 
             let hash = try stream.read(lenght: SHA256.Lenght)
             let size: UInt32 = try stream.read()
             guard size > 0 else { break }
 
-            let data = try stream.read(lenght: Int(size))
-            guard SHA256.hash( data ) == hash else { throw KDBXError.corruptedDatabase }
-            content += data
+            let block = try stream.read(lenght: Int(size))
+            guard SHA256.hash( block ) == hash else { throw KDBXError.corruptedDatabase }
+            content += block
         }
 
         if header[.compressionFlags] == Compression.gzip {
@@ -81,28 +81,4 @@ extension Database3: Writable {
         try output.write(header)
         fatalError()
     }
-}
-
-extension Database3.Header: Readable {
-    
-    public init(from input: Input) throws {
-        var header = Database3.Header()
-
-        while true {
-            let field: TLV<OuterHeader, UInt16> = try input.read()
-            header.append(field)
-            if field.type == .end { break }
-        }
-
-        self = header
-    }
-    
-}
-
-extension Database3.Header: Header {
-
-    subscript(_ type: OuterHeader) -> Bytes? {
-        return first(where: { $0.type == type })?.value
-    }
-
 }

@@ -64,7 +64,7 @@ public class File {
 
         guard try stream.read() == FileSignature else { throw KDBXError.invalidFileFormat }
 
-        let format = try stream.read() as UInt32
+        let format: UInt32 = try stream.read()
         guard
             format == BetaFileFormat ||
             format == FileFormat
@@ -78,7 +78,6 @@ extension File: Writable {
 
     public func write(to output: Output) throws {
         try output.write(version)
-        // `try output.write(version)` error: Protocol type 'Writable & Database' cannot conform to 'Writable' because only concrete types can conform to protocols
         try database.write(to: output)
     }
 

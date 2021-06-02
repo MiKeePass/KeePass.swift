@@ -23,34 +23,72 @@ import XML
 
 class Database4: Database {
 
-    struct Header {
-        let fields: [TLV<OuterHeader, UInt32>]
-        let data: Bytes
-    }
+    let outerHeader: Header<OuterHeader, UInt32>
 
-    let header: Header
+    let innerHeader: Header<InnerHeader, UInt32>
 
     let document: Document
 
     required init(from input: Input, compositeKey: CompositeKey) throws {
-        header = try input.read()
+        outerHeader = try input.read()
 
-        var key = try header.masterKey(from: compositeKey)
-        let hmacKey = SHA512.hash( UInt64.max.bytes + SHA512.hash( key + 1 ) )
-        key = SHA256.hash( key )
+        let masterKey = try outerHeader.masterKey(from: compositeKey)
 
-        let data = try input.read() as Bytes
+        // Get outer header bytes to verify the hash
+        let header = input.bytes.prefix(input.offset)
+        var content = try Database4.unhash(header: header,
+                                           data: try input.read(),
+                                           key: masterKey)
+
+        let key = SHA256.hash( masterKey )
+        let cipher = try outerHeader.cipher(key: key)
+        content = try cipher.decrypt(data: content)
+
+        if outerHeader[.compressionFlags] == Compression.gzip {
+            content = try content.gunzipped()
+        }
+
+        let stream = Input(bytes: content)
+        innerHeader = try stream.read()
+
+        var options = XML.Options()
+        options.parserSettings.shouldTrimWhitespace = false
+
+        document = try XML.Document(xml: stream.remaining.data, options: options)
+    }
+
+    class func unhash(header: Bytes, data: Bytes, key: Bytes) throws -> Bytes {
         let stream = Input(bytes: data)
 
+        let key = SHA512.hash( key + 1 )
+        let hmacKey = HmacKey(block: .max, key: key)
+
         guard
-            try stream.read(lenght: SHA256.Lenght) == SHA256.hash( header.data ),
-            try stream.read(lenght: SHA256.Lenght) == HMACSHA256.authenticate(header.data, key: hmacKey)
-        else { throw KDBXError.corruptedDatabase }
+            try stream.read(lenght: SHA256.Lenght) == SHA256.hash( header ),
+            try stream.read(lenght: HMACSHA256.Lenght) == HMACSHA256.authenticate(header, key: hmacKey)
+        else { throw KDBXError.invalidCompositeKey }
 
-        let cipher = try header.cipher(key: key)
-        let hash = try cipher.decrypt(data: data)
+        var index: UInt64 = 0
+        var content = Bytes()
 
-        fatalError()
+        while stream.hasBytesAvailable {
+
+            let hmac = try stream.read(lenght: HMACSHA256.Lenght)
+            let size = try CFSwapInt32LittleToHost(stream.read())
+            let block = try stream.read(lenght: Int(size))
+
+            let hmacKey = HmacKey(block: index, key: key)
+            let hash = HMACSHA256(key: hmacKey)
+            hash.update(CFSwapInt64HostToLittle(index).bytes)
+            hash.update(CFSwapInt32HostToLittle(size).bytes)
+            hash.update(block)
+
+            guard hash.final == hmac else { throw KDBXError.corruptedDatabase }
+            content += block
+            index += 1
+        }
+
+        return content
     }
 
 }
@@ -58,36 +96,17 @@ class Database4: Database {
 extension Database4: Writable {
 
     func write(to output: Output) throws {
-        try output.write(header)
+        try output.write(outerHeader)
         fatalError()
     }
 
 }
 
-extension Database4.Header: Streamable {
-
-    init(from input: Input) throws {
-        var fields = [TLV<OuterHeader, UInt32>]()
-
-        while true {
-            let field: TLV<OuterHeader, UInt32> = try input.read()
-            fields.append(field)
-            if field.type == .end { break }
-        }
-
-        self.fields = fields
-        self.data = input.bytes.prefix(input.offset)
-    }
-
-    func write(to output: Output) throws {
-        try output.write(fields)
-    }
-
-}
-
-extension Database4.Header: Header {
-
-    subscript(_ field: OuterHeader) -> Bytes? {
-        return fields.first(where: { $0.type == field })?.value
-    }
+func HmacKey(block index: UInt64, key: Bytes) -> Bytes {
+    // Ensure endianess
+    let index = CFSwapInt64LittleToHost(index)
+    let hash = SHA512()
+    hash.update(index.bytes)
+    hash.update(key)
+    return hash.final
 }
