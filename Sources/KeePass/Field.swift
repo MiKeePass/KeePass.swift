@@ -24,12 +24,3 @@ public struct Field {
     public var value: String?
     public var isProtected: Bool
 }
-
-public struct Times {
-    public let creationDate: Date
-    public var lastModifiedDate: Date
-    public var lastAccessDate: Date
-    public var expirationDate: Date?
-}
-
-

@@ -19,11 +19,7 @@
 import Foundation
 
 public protocol Database {
-
     associatedtype Root: Group
 
-    typealias Entry = Root.Entries.Element
-
     var root: Root { get }
-    
 }

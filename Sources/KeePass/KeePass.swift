@@ -31,7 +31,7 @@ public enum FileFormat: UInt32, Streamable {
 
 public class KeePass {
 
-    public static func open(contentOf url: URL, compositeKey: CompositeKey) throws -> AnyDatabase {
+    public static func open(contentOf url: URL, compositeKey: CompositeKey) throws -> some Database {
 
         let bytes = try Bytes(contentsOf: url)
         let stream = Input(bytes: bytes)
@@ -40,7 +40,7 @@ public class KeePass {
             throw KeePassError.invalidFileFormat
         }
 
-        let format = try stream.read() as FileFormat
+        let format: FileFormat = try stream.read()
 
         switch format {
         case .kdb:
@@ -50,8 +50,8 @@ public class KeePass {
         }
     }
 
-    public static func open(contentOf xml: URL) throws -> AnyDatabase {
-        return AnyDatabase ( try KDBX.File(xml: xml) )
+    public static func open(contentOf xml: URL) throws -> some Database {
+        try KDBX.File(xml: xml)
     }
 
 }

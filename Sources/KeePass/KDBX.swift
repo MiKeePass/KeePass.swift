@@ -28,7 +28,7 @@ extension KDBX.File: Database {
 }
 
 extension Element {
-    private var this: XML.Element { self as XML.Element }
+    private var this: XML.Element { self }
 }
 
 extension XML.Element {
@@ -42,7 +42,7 @@ extension XML.Element {
 extension Field {
 
     init?(_ element: XML.Element) {
-        guard let key = element.Key.value else { return nil}
+        guard let key = element.Key.value else { return nil }
         name = key
 
         value = element.Value.value
