@@ -1,11 +1,11 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.3
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "KeePass",
-    platforms: [.iOS(.v13), .macOS(.v10_12)],
+    platforms: [.iOS(.v13), .macOS(.v10_15)],
 
     products: [
         // The `Binary` manipulate bytes with ease.
@@ -31,6 +31,10 @@ let package = Package(
             dependencies: [ "Binary",
                             "KDB",
                             "KDBX"]),
+        .testTarget(
+            name: "KeePassTests",
+            dependencies: ["KeePass"],
+            resources: [ .process("Fixtures") ]),
 
         .target(
             name: "KDB",
@@ -57,20 +61,25 @@ let package = Package(
                             "Sodium", 
                             "Argon2", 
                             "Twofish"]),
+        .testTarget(
+            name: "CryptoTests",
+            dependencies: ["Crypto"]),
 
         .target(
             name: "Gzip",
-            dependencies: ["Binary"]),
+            dependencies: ["Binary"],
+            exclude: ["LICENSE"]),
 
         .target(
             name: "XML",
             dependencies: []),
 
-        // MARK: KeePass cryptographic libraries
+        // MARK: KeePass Cryptographic Libraries
 
         .target(
             name: "Sodium",
             dependencies: [],
+            exclude: ["LICENSE"],
             cSettings: [
                 .headerSearchPath("include/sodium"),
                 .define("CONFIGURED")
@@ -78,7 +87,8 @@ let package = Package(
 
         .target(
             name: "Argon2",
-            dependencies: []),
+            dependencies: [],
+            exclude: ["LICENSE"]),
 
         .target(
             name: "Twofish",
