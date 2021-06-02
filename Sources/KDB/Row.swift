@@ -21,7 +21,7 @@ import Binary
 
 public typealias Property<Type> = TLV<Type, UInt32>
 
-public protocol Row: class {
+public protocol Row: AnyObject {
 
     associatedtype `Type`: Streamable, Equatable
 
