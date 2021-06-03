@@ -18,28 +18,28 @@
 
 import Foundation
 
-public protocol TLVProtocol {
+public protocol TypeLenghtValue {
 
-    associatedtype `Type`
+    associatedtype Type_
 
     associatedtype Lenght: BinaryInteger
 
     associatedtype Value
 
-    var type: Type { get }
+    var type: Type_ { get }
 
-    var value: Value { get set }
+    var value: Value { get }
 }
 
-public protocol Endable {
-    var isAtEnd: Bool { get }
+public protocol Endable: Equatable {
+    static var endValue: Self { get }
 }
 
-public struct TLV<Type, Lenght>: TLVProtocol where Lenght: BinaryInteger {
+public struct TLV<Type, Lenght>: TypeLenghtValue where Lenght: BinaryInteger {
 
     public let type: Type
 
-    public var value: Bytes
+    public private(set) var value: Bytes
 
     public init(type: Type, value: Bytes) {
         self.type = type
@@ -47,7 +47,7 @@ public struct TLV<Type, Lenght>: TLVProtocol where Lenght: BinaryInteger {
     }
 
     public func get<T>() throws -> T where T: BytesRepresentable {
-        return try T(value)
+        try T(value)
     }
 
     public mutating func set<T>(_ value: T?) throws where T: BytesRepresentable {
@@ -75,28 +75,28 @@ extension TLV: Writable where Type: Writable, Lenght: Writable {
 
 }
 
-extension Sequence where Element: TLVProtocol, Element.`Type`: Equatable, Element.Value == Bytes {
+extension Sequence where Element: TypeLenghtValue, Element.Type_: Equatable, Element.Value == Bytes {
 
-    public func first<T>(valueOf type: Element.`Type`) throws -> T? where T: BytesRepresentable {
+    public func first<T>(valueOf type: Element.Type_) throws -> T? where T: BytesRepresentable {
         return try first(where: { $0.type == type }).map { try T($0.value) }
     }
 
-    public func first<T>(where type: Element.`Type`, _ predicate: (T) throws -> Bool) throws -> Element? where T: BytesRepresentable {
+    public func first<T>(where type: Element.Type_, _ predicate: (T) throws -> Bool) throws -> Element? where T: BytesRepresentable {
         return try first(where: { try predicate(try T($0.value)) })
     }
 
-    public func sorted<T>(field: Element.`Type`, by areInIncreasingOrder: (T, T) throws -> Bool) throws -> [Self.Element] where T: BytesRepresentable {
+    public func sorted<T>(field: Element.Type_, by areInIncreasingOrder: (T, T) throws -> Bool) throws -> [Self.Element] where T: BytesRepresentable {
         return try sorted(by: { try areInIncreasingOrder(try T($0.value), try T($1.value)) })
     }
 
-    public subscript<T>(_ type: Element.`Type`) -> T? where T: BytesRepresentable {
+    public subscript<T>(_ type: Element.Type_) -> T? where T: BytesRepresentable {
         try? first(valueOf: type)
     }
 }
 
-extension RangeReplaceableCollection where Element: TLVProtocol, Element.`Type`: Equatable {
+extension RangeReplaceableCollection where Element: TypeLenghtValue, Element.Type_: Equatable {
 
-    public mutating func removeAll(_ type: Element.`Type`) {
+    public mutating func removeAll(_ type: Element.Type_) {
         removeAll(where: { $0.type == type })
     }
 
@@ -107,5 +107,19 @@ extension TLV: CustomDebugStringConvertible {
     public var debugDescription: String {
         "(T:\(type) L:\(value.lenght))"
     }
+}
 
+extension Array: Readable where Element: TypeLenghtValue & Readable, Element.Type_: Endable {
+
+    public init(from input: Input) throws {
+        var fields: [Element] = []
+
+        while true {
+            let field: Element = try input.read()
+            fields.append(field)
+            if field.type == Element.Type_.endValue { break }
+        }
+
+        self = fields
+    }
 }

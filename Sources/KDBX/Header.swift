@@ -37,7 +37,7 @@ enum OuterHeader: UInt8, Streamable, Endable {
     case kdfParameters       = 11
     case publicCustomData    = 12
 
-    var isAtEnd: Bool { self == .end }
+    public static var endValue: OuterHeader { .end }
 }
 
 enum InnerHeader: UInt8, Streamable, Endable {
@@ -46,7 +46,7 @@ enum InnerHeader: UInt8, Streamable, Endable {
     case innerRandomStreamKey = 2
     case binary               = 3
 
-    var isAtEnd: Bool { self == .end }
+    public static var endValue: InnerHeader { .end }
 }
 
 enum Compression: UInt32, BytesRepresentable {
@@ -63,7 +63,7 @@ enum RandomStream: UInt32, BytesRepresentable {
     case count      = 4
 }
 
-extension Array where Element: TLVProtocol, Element.`Type` == OuterHeader, Element.Value == Bytes {
+extension Array where Element: TypeLenghtValue, Element.Type_ == OuterHeader, Element.Value == Bytes {
 
     func cipher(key: Bytes) throws -> Cipher {
         guard
@@ -115,20 +115,5 @@ extension Array where Element: TLVProtocol, Element.`Type` == OuterHeader, Eleme
         default:
             throw KDBXError.unsupportedKeyDerivation
         }
-    }
-}
-
-extension Array: Readable where Element: TLVProtocol & Readable, Element.`Type`: Endable {
-
-    public init(from input: Input) throws {
-        var fields: [Element] = []
-
-        while true {
-            let field: Element = try input.read()
-            fields.append(field)
-            if field.type.isAtEnd { break }
-        }
-
-        self = fields
     }
 }

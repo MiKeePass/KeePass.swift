@@ -132,7 +132,7 @@ extension Readable where Self: OptionSet, RawValue: Readable {
 extension Array: Writable where Element: Writable {
 
     public func write(to output: Output) throws {
-        try forEach { try output.write($0) }
+        try forEach(output.write)
     }
 
 }
@@ -141,13 +141,13 @@ extension Array: Writable where Element: Writable {
 
 extension String: Streamable {
 
-    public init?(bytes: Bytes, encoding: String.Encoding) {
+    public init?(bytes: Bytes, encoding: String.Encoding = .utf8) {
         let data = Data(bytes.rawValue)
         self.init(data: data, encoding: encoding)
     }
 
-    public func bytes(using: String.Encoding) -> Bytes? {
-        return data(using: .utf8)?.bytes
+    public func bytes(using encoding: String.Encoding = .utf8) -> Bytes? {
+        data(using: encoding)?.bytes
     }
 
 }

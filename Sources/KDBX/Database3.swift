@@ -73,12 +73,7 @@ class Database3: Database {
         document = try XML.Document(xml: content.data, options: options)
     }
 
-}
-
-extension Database3: Writable {
-
-    func write(to output: Output) throws {
-        try output.write(header)
+    func write(to output: Output, compositeKey: CompositeKey) throws {
         fatalError()
     }
 }

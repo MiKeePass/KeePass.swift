@@ -51,6 +51,6 @@ extension ChaCha20: Cipher {
     }
 
     public func decrypt(data: Bytes) throws -> Bytes {
-        return try encrypt(data: data)
+        try encrypt(data: data)
     }
 }

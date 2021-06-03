@@ -17,9 +17,12 @@
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
 import Foundation
+import Binary
 import XML
 
 public protocol Database {
 
     var document: Document { get }
+
+    func write(to output: Output, compositeKey: CompositeKey) throws
 }

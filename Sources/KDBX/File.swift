@@ -34,7 +34,7 @@ public class File {
 
     public let version: Version
 
-    public let database: Database & Writable
+    public let database: Database
 
     public required init(from input: Input) throws {
         version = Version(major: 0, minor: 0)
@@ -72,13 +72,11 @@ public class File {
 
         try self.init(from: stream, compositeKey: compositeKey)
     }
-}
 
-extension File: Writable {
-
-    public func write(to output: Output) throws {
+    public func write(to output: Output, compositeKey: CompositeKey) throws {
+        try output.write(FileSignature)
+        try output.write(BetaFileFormat)
         try output.write(version)
-        try database.write(to: output)
     }
 
 }

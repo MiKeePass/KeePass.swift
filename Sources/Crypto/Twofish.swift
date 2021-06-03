@@ -20,7 +20,7 @@ import Foundation
 import Binary
 import Twofish
 
-public final class Twofish {
+public final class Twofish: Cipher {
 
     private var context: twofish_context
 
@@ -37,11 +37,7 @@ public final class Twofish {
         context = twofish_context()
         twofish_setup(&context, key.rawValue, iv.rawValue, twofish_options_default)
     }
-    
-}
 
-extension Twofish: Cipher {
-    
     public func encrypt(data: Bytes) throws -> Bytes {
         let output_length = twofish_get_output_length(&context, lenght(data))
         var out = Bytes(lenght: Int(output_length))

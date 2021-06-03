@@ -24,9 +24,7 @@ public class Input {
 
     public private(set) var offset = 0
 
-    public var remaining: Bytes {
-        bytes.suffix(from: offset)
-    }
+    public var remaining: Bytes { bytes.suffix(from: offset) }
 
     public var hasBytesAvailable: Bool { stream.hasBytesAvailable }
 

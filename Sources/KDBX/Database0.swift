@@ -30,11 +30,7 @@ class Database0: Database {
         document = try XML.Document(xml: input.bytes.data, options: options)
     }
 
-}
-
-extension Database0: Writable {
-
-    func write(to output: Output) throws {
+    func write(to output: Output, compositeKey: CompositeKey) throws {
         try output.write(document.xml)
     }
 }

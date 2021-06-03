@@ -20,11 +20,11 @@ import Foundation
 import Binary
 import KDB
 
-extension KDB.Database: Database {
+extension CompositeKey: KDB.CompositeKey { }
 
-}
+extension KDB.Database: Database {}
 
-extension KDB.Property where Type == KDB.Entry.`Type` {
+extension TLV where Type == KDB.Entry.Column {
 
     init?(_ field: Field) {
 
@@ -53,8 +53,13 @@ extension KDB.Property where Type == KDB.Entry.`Type` {
 extension KDB.Group: Group {
 
     public var title: String {
-        get { name }
-        set { name = newValue }
+        get { self[.name] ?? "" }
+        set { self[.name] = newValue }
+    }
+
+    public var icon: Int {
+        get { self[.iconID] ?? 0 }
+        set { self[.iconID] =  newValue }
     }
 
     public var groups: [KDB.Group] { childs }
@@ -65,19 +70,33 @@ extension KDB.Entry: Entry {
     public var times: Timestamp {
          return self
     }
-    
+
     public var fields: [Field] {
         properties.compactMap { Field($0) }
     }
 
     public func set(_ field: Field) {
-        guard let field = KDB.Property(field) else { return }
+        guard let field = TLV<Column, UInt32>(field) else { return }
         set(field)
     }
 
 }
 
 extension KDB.Entry: Timestamp {
+
+    public var creationDate: Date {
+        date(at: .creationTime) ?? Date.distantPast
+    }
+
+    public var lastModifiedDate: Date {
+        get { date(at: .lastModifiedTime) ?? Date.distantPast }
+        set { set(newValue, at: .lastModifiedTime) }
+    }
+
+    public var lastAccessDate: Date {
+        get { date(at: .lastAccessTime) ?? Date.distantPast }
+        set { set(newValue, at: .lastAccessTime) }
+    }
 
     public var expirationDate: Date? {
         get { nil }
@@ -88,7 +107,7 @@ extension KDB.Entry: Timestamp {
 
 extension Field {
 
-    init?(_ field: KDB.Property<KDB.Entry.`Type`>) {
+    init?(_ field: TLV<KDB.Entry.Column, UInt32>) {
 
         switch field.type {
         case .title:

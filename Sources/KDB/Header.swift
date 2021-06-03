@@ -25,9 +25,9 @@ struct Header {
     let version: UInt32
     let masterSeed: Bytes
     let initialVector: Bytes
-    let groups: UInt32
-    let entries: UInt32
-    let contentHash: Bytes
+    var groups: UInt32
+    var entries: UInt32
+    var contentHash: Bytes
     let transformSeed: Bytes
     let transformRounds: UInt32
 }
@@ -66,7 +66,6 @@ extension Header: Streamable {
         try output.write(transformSeed)
         try output.write(transformRounds)
     }
-
 }
 
 extension Header {

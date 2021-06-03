@@ -23,6 +23,8 @@ import KDBX
 
 let DateFormatter = ISO8601DateFormatter()
 
+extension CompositeKey: KDBX.CompositeKey { }
+
 extension KDBX.File: Database {
     public var root: Element { database.document.root.KeePassFile.Root }
 }

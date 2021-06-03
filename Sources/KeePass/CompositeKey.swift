@@ -20,8 +20,6 @@ import Foundation
 import Binary
 import Crypto
 import XML
-import KDB
-import KDBX
 
 public struct CompositeKey {
 
@@ -64,7 +62,3 @@ public struct CompositeKey {
     }
 
 }
-
-extension CompositeKey: KDB.CompositeKey { }
-
-extension CompositeKey: KDBX.CompositeKey { }

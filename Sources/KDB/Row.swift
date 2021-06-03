@@ -19,94 +19,68 @@
 import Foundation
 import Binary
 
-public typealias Property<Type> = TLV<Type, UInt32>
-
 public protocol Row: AnyObject {
+    associatedtype Column
 
-    associatedtype `Type`: Streamable, Equatable
-
-    static var End: Type { get }
-
-    var properties: [Property<Type>] { get set }
-
-    init()
+    var properties: [TLV<Column, UInt32>] { get set }
 }
 
-extension Row {
+extension Row where Self: Writable, Column: Writable {
 
-    public subscript(_ type: Type) -> Bytes? {
-        get { properties.first(where: { $0.type == type })?.value }
+    public func write(to output: Output) throws {
+        try output.write(properties)
+    }
+}
+
+extension Row where Column: Equatable {
+
+    public subscript(_ column: Column) -> Bytes? {
+        get { properties.first(where: { $0.type == column })?.value }
         set {
-            properties.removeAll(type)
+            properties.removeAll(column)
             guard let value = newValue else { return }
-            let tlv = Property(type: type, value: value)
+            let tlv = TLV<Column, UInt32>(type: column, value: value)
             properties.insert(tlv, at: 0)
         }
     }
 
-    public func set(_ field: Property<Type>) {
-        properties.removeAll(field.type)
-        properties.insert(field, at: 0)
+    public func set(_ property: TLV<Column, UInt32>) {
+        properties.removeAll(property.type)
+        properties.insert(property, at: 0)
     }
 
-    public func set(_ date: Date, at type: Type) {
-        self[type] = Database.bytes(from: date)
+    public func set(_ date: Date, at column: Column) {
+        self[column] = Database.bytes(from: date)
     }
 
-    public func date(at type: Type) -> Date? {
-        guard let bytes = self[type] else { return nil }
+    public func date(at column: Column) -> Date? {
+        guard let bytes = self[column] else { return nil }
         return Database.date(from: bytes)
     }
 
-    public subscript<T>(_ type: Type) -> T? where T: BytesRepresentable {
-        get {
-            guard let bytes = self[type] else { return nil }
-            return try? T(bytes)
-        }
-        set { self[type] = newValue?.bytes }
+    public subscript<T>(_ column: Column) -> T? where T: BytesRepresentable {
+        get { T?(self[column]) }
+        set { self[column] = newValue?.bytes }
     }
 
-    public func remove(_ type: Type) {
-        properties.removeAll(type)
+    public func remove(_ column: Column) {
+        properties.removeAll(column)
     }
 }
 
-extension Readable where Self: Row {
+extension Sequence where Element: Row, Element.Column: Equatable {
 
-    public init(from input: Input) throws {
-        self.init()
-        while true {
-            let field = try input.read() as Property<Type>
-            guard field.type != Self.End else { break }
-            properties.append(field)
-        }
-    }
-
-}
-
-extension Writable where Self: Row {
-
-    public func write(to output: Output) throws {
-        try output.write(properties)
-        let end = Property(type: Self.End, value: [])
-        try output.write(end)
-    }
-    
-}
-
-extension Sequence where Element: Row {
-
-    public func first<T>(where type: Element.`Type`, _ predicate: (T) throws -> Bool) throws -> Element? where T: BytesRepresentable {
-        return try first(where: {
-            guard let bytes = $0[type] else { return false }
-            return try predicate(try T(bytes))
+    public func first<T>(column: Element.Column, where predicate: (T) throws -> Bool) throws -> Element? where T: BytesRepresentable {
+        try first(where: {
+            guard let bytes = $0[column] else { return false }
+            return try predicate(T(bytes))
         })
     }
 
-    public func sorted<T>(field: Element.`Type`, by areInIncreasingOrder: (T, T) throws -> Bool) throws -> [Self.Element] where T: BytesRepresentable {
-        return try sorted(by: {
-            guard let rhs = $0[field], let lhs = $1[field] else { return false }
-            return try areInIncreasingOrder(try T(rhs), try T(lhs))
+    public func sorted<T>(column: Element.Column, by areInIncreasingOrder: (T, T) throws -> Bool) throws -> [Element] where T: BytesRepresentable {
+        try sorted(by: {
+            guard let rhs = $0[column], let lhs = $1[column] else { return false }
+            return try areInIncreasingOrder(T(rhs),T(lhs))
         })
     }
 

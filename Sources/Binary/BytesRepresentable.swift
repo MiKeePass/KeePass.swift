@@ -39,7 +39,6 @@ extension Bool: BytesRepresentable {
     public var bytes: Bytes {
         withUnsafeBytes(of: self) { Bytes($0) }
     }
-
 }
 
 // MARK: - Streamable Integer
@@ -54,7 +53,6 @@ extension BytesRepresentable where Self: BinaryInteger {
     public var bytes: Bytes {
         withUnsafeBytes(of: self) { Bytes($0) }
     }
-
 }
 
 extension Int: BytesRepresentable { }
@@ -89,7 +87,6 @@ extension BytesRepresentable where Self: FloatingPoint {
     public var bytes: Bytes {
         withUnsafeBytes(of: self) { Bytes(rawValue: Array($0)) }
     }
-
 }
 
 extension Double: BytesRepresentable { }
@@ -125,7 +122,7 @@ extension Bytes: BytesRepresentable {
 extension Array where Element == Bytes {
 
     subscript<T>(_ index: Int) -> T? where T: BytesRepresentable {
-        return try? T(self[index])
+        try? T(self[index])
     }
 }
 
@@ -149,7 +146,6 @@ extension String: BytesRepresentable {
         guard let string = String(bytes: bytes, encoding: .utf8) else { throw BinaryError.invalidValue }
         self = string
     }
-
 }
 
 // MARK: - Data Bytes
@@ -161,7 +157,6 @@ extension Data: BytesRepresentable {
     public init(_ bytes: Bytes) throws {
         self = Data(bytes.rawValue)
     }
-
 }
 
 // MARK: - UUID Bytes
@@ -177,5 +172,15 @@ extension UUID: BytesRepresentable {
         let uuid = bytes.withUnsafeBytes { $0.load(as: uuid_t.self) }
         self = UUID(uuid: uuid)
     }
+}
 
+extension Optional where Wrapped: BytesRepresentable {
+
+    public init(_ bytes: Bytes?) {
+        if let bytes = bytes, let wrapped = try? Wrapped(bytes) {
+            self = .some(wrapped)
+        } else {
+            self = .none
+        }
+    }
 }

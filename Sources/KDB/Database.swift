@@ -32,7 +32,7 @@ public class Database {
     public required init(from input: Input, compositeKey: CompositeKey) throws {
         header = try input.read()
 
-        let data = try input.read() as Bytes
+        let data: Bytes = try input.read()
         let key = try header.masterKey(from: compositeKey)
 
         let cipher: Cipher
@@ -56,7 +56,6 @@ public class Database {
     }
 
     public convenience init(from file: URL, compositeKey: CompositeKey) throws {
-
         let bytes = try Bytes(contentsOf: file)
         let stream = Input(bytes: bytes)
 
@@ -68,13 +67,39 @@ public class Database {
         try self.init(from: stream, compositeKey: compositeKey)
     }
 
-}
+    public func write(to output: Output, compositeKey: CompositeKey) throws {
 
-extension Database: Writable {
+        func groups(in group: Group) -> UInt32 {
+            let count = UInt32(group.childs.count)
+            return group.childs.reduce(count) { $0 + groups(in: $1) }
+        }
 
-    public func write(to output: Output) throws {
+        func entries(in group: Group) -> UInt32 {
+            let count = UInt32(group.entries.count)
+            return group.childs.reduce(count) { $0 + entries(in: $1) }
+        }
+
+        let key = try header.masterKey(from: compositeKey)
+        let cipher: Cipher
+
+        if header.cipher.contains(.aes) {
+            cipher = try AESCipher(key: key, iv: header.initialVector)
+        } else if header.cipher.contains(.twofish) {
+            cipher = try Twofish(key: key, iv: header.initialVector)
+        } else {
+            throw KDBError.unsupportedCipher
+        }
+
+        let content = try Data(from: root)
+
+        var header = header
+        header.contentHash = SHA256.hash(content)
+        header.groups = groups(in: root)
+        header.entries = entries(in: root)
         try output.write(header)
-        fatalError()
+
+        let data = try cipher.encrypt(data: content)
+        try output.write(data)
     }
 
 }
@@ -91,7 +116,7 @@ private func Root(from input: Input, groups: Int, entries: Int) throws -> Group 
         guard let level1: UInt16 = group[.groupLevel] else { throw KDBError.corruptedDatabase }
 
         if level1 == 0 {
-            root.childs.append(group)
+            root.add(group)
             continue
         }
 
@@ -100,7 +125,7 @@ private func Root(from input: Input, groups: Int, entries: Int) throws -> Group 
 
             if level2 < level1 {
                 guard (level1 - level2) == 1 else { throw KDBError.corruptedDatabase }
-                parent.childs.append(group)
+                parent.add(group)
                 break
             }
 
@@ -111,10 +136,13 @@ private func Root(from input: Input, groups: Int, entries: Int) throws -> Group 
 
     for entry in entries {
         guard let groupID: UInt32 = entry[.groupID] else { throw KDBError.corruptedDatabase }
-
-        let group = try groups.first(where: .groupID, { $0 == groupID }) ?? root
+        let group = try groups.first(column: .groupID, where: { $0 == groupID }) ?? root
         group.add(entry)
     }
 
     return root
+}
+
+private func Data(from root: Group) throws -> Bytes {
+    fatalError()
 }

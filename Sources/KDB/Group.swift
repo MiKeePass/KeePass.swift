@@ -21,9 +21,7 @@ import Binary
 
 public final class Group: Row, Streamable {
 
-    public static let End = Type.end
-
-    public enum `Type`: UInt16, Streamable {
+    public enum Column: UInt16, Streamable, Endable {
         case reserved           = 0x0000
         case groupID            = 0x0001
         case name               = 0x0002
@@ -35,18 +33,26 @@ public final class Group: Row, Streamable {
         case groupLevel         = 0x0008
         case groupFlags         = 0x0009
         case end                = 0xFFFF
+
+        public static var endValue: Self { .end }
     }
 
-    var parent: Group?
+    public internal(set) weak var parent: Group?
 
-    public var properties: [Property<Type>]
+    public internal(set) var childs: [Group]
 
-    public var childs: [Group]
+    public internal(set) var entries: [Entry]
 
-    public var entries: [Entry]
+    public var properties: [TLV<Column, UInt32>]
 
-    public required init() {
+    public init() {
         properties = []
+        childs = []
+        entries = []
+    }
+
+    public init(from input: Input) throws {
+        properties = try input.read()
         childs = []
         entries = []
     }
@@ -54,63 +60,36 @@ public final class Group: Row, Streamable {
 
 extension Group {
 
-    public var name: String {
-        get { self[.name] ?? "" }
-        set { self[.name] = newValue }
-    }
-
-    public var level: Int {
-        get { self[.groupLevel] ?? 0 }
-        set { self[.groupLevel] = newValue }
-    }
-
-    public var icon: Int {
-        get { self[.iconID] ?? 0 }
-        set { self[.iconID] = newValue }
-    }
-
-    public var creationDate: Date {
-        date(at: .creationTime) ?? Date.distantPast
-    }
-
-    public var lastModifiedDate: Date {
-        get { date(at: .lastModifiedTime) ?? Date.distantPast }
-        set { set(newValue, at: .lastModifiedTime) }
-    }
-
-    public var lastAccessDate: Date {
-        get { date(at: .lastAccessTime) ?? Date.distantPast }
-        set { set(newValue, at: .lastAccessTime) }
-    }
-
     public func removeFromParent() {
         parent?.childs.removeAll(where: { $0 == self })
+        parent = nil
     }
 
     public func add(_ entry: Entry) {
         entry.removeFromParent()
         entries.append(entry)
         entry[.groupID] = self[.groupID]
+        entry.parent = self
     }
 
     public func add(_ group: Group) {
         group.removeFromParent()
         childs.append(group)
-        group.level = level + 1
+        group[.groupLevel] = self[.groupLevel] ?? 0 + 1
+        group.parent = self
     }
 }
 
 extension Group: Hashable {
 
     public static func == (lhs: Group, rhs: Group) -> Bool {
-        guard let lhs = lhs[.groupLevel], let rhs = rhs[.groupLevel] else { return false }
-        return lhs == rhs
+        lhs[.groupID] == rhs[.groupID] &&
+        lhs[.groupLevel] == rhs[.groupLevel]
     }
 
     public func hash(into hasher: inout Hasher) {
-        if let groupID = self[.groupID] { hasher.combine(groupID) }
-        if let name = self[.name] { hasher.combine(name) }
-        if let groupLevel = self[.groupLevel] { hasher.combine(groupLevel) }
+        hasher.combine(self[.groupID])
+        hasher.combine(self[.name])
+        hasher.combine(self[.groupLevel])
     }
-
 }

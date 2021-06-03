@@ -19,31 +19,9 @@
 import Foundation
 import Binary
 
-let MetaEntryBinaryDescription   = "bin-stream"
-let MetaEntryTitle               = "Meta-Info"
-let MetaEntryUsername            = "SYSTEM"
-let MetaEntryURL                 = "$"
-
-let MetaEntryUIState                         = "Simple UI State"
-let MetaEntryDefaultUsername                 = "Default User Name"
-let MetaEntrySearchHistoryItem               = "Search History Item"
-let MetaEntryCustomKVP                       = "Custom KVP"
-let MetaEntryDatabaseColor                   = "Database Color"
-let MetaEntryKeePassXCustomIcon              = "KPX_CUSTOM_ICONS_2"
-let MetaEntryKeePassXCustomIcon2             = "KPX_CUSTOM_ICONS_4"
-let MetaEntryKeePassXGroupTreeState          = "KPX_GROUP_TREE_STATE"
-let MetaEntryKeePassKitGroupUUIDs            = "KeePassKit Group UUIDs"
-let MetaEntryKeePassKitDeletedObjects        = "KeePassKit Deleted Objects"
-let MetaEntryKeePassKitDatabaseName          = "KeePassKit Database Name"
-let MetaEntryKeePassKitDatabaseDescription   = "KeePassKit Database Description"
-let MetaEntryKeePassKitTrash                 = "KeePassKit Trash"
-let MetaEntryKeePassKitUserTemplates         = "KeePassKit User Templates"
-
 public final class Entry: Row, Streamable {
 
-    public static let End = Type.end
-
-    public enum `Type`: UInt16, Streamable {
+    public enum Column: UInt16, Streamable, Endable {
         case reserved           = 0x0000
         case uuid               = 0x0001
         case groupID            = 0x0002
@@ -60,53 +38,41 @@ public final class Entry: Row, Streamable {
         case binaryDesc         = 0x000D
         case binaryData         = 0x000E
         case end                = 0xFFFF
+
+        public static var endValue: Self { .end }
     }
 
-    var parent: Group?
+    public internal(set) weak var parent: Group?
 
-    public var properties: [Property<Type>]
+    public var properties: [TLV<Column, UInt32>]
 
-    public required init() {
+    public init() {
         properties = []
-    }    
+    }
+
+    public init(from input: Input) throws {
+        properties = try input.read()
+    }
 }
 
 extension Entry {
 
-    public var creationDate: Date {
-        date(at: .creationTime) ?? Date.distantPast
-    }
-
-    public var lastModifiedDate: Date {
-        get { date(at: .lastModifiedTime) ?? Date.distantPast }
-        set { set(newValue, at: .lastModifiedTime) }
-    }
-
-    public var lastAccessDate: Date {
-        get { date(at: .lastAccessTime) ?? Date.distantPast }
-        set { set(newValue, at: .lastAccessTime) }
-    }
-
-    var isMetaEntry: Bool {
-        return false
-    }
-
     public func removeFromParent() {
         parent?.entries.removeAll(where: { $0 == self })
         self[.groupID] = -1
+        parent = nil
     }
 }
 
 extension Entry: Hashable {
 
     public static func == (lhs: Entry, rhs: Entry) -> Bool {
-        guard let lhs = lhs[.uuid], let rhs = rhs[.uuid] else { return false }
-        return lhs == rhs
+        lhs[.uuid] == rhs[.uuid]
     }
 
     public func hash(into hasher: inout Hasher) {
-        if let uuid = self[.uuid] { hasher.combine(uuid) }
-        else if let title = self[.title] { hasher.combine(title) }
+        hasher.combine(self[.uuid])
+        hasher.combine(self[.title])
     }
 
 }
