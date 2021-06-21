@@ -1,4 +1,5 @@
 import XCTest
+import Binary
 @testable import KeePass
 
 final class KeePassTests: XCTestCase {
@@ -8,6 +9,10 @@ final class KeePassTests: XCTestCase {
         let key = CompositeKey(password: "1234")
         let db = try KeePass.open(contentOf: file, compositeKey: key)
         print(db)
+
+        let stream = Output()
+        try db.write(to: stream, compositeKey: key)
+        print(stream.lenght)
     }
 
     func testKDBX3() throws {

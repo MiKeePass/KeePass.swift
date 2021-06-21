@@ -26,7 +26,12 @@ let DateFormatter = ISO8601DateFormatter()
 extension CompositeKey: KDBX.CompositeKey { }
 
 extension KDBX.File: Database {
+
     public var root: Element { database.document.root.KeePassFile.Root }
+
+    public func write(to output: Output, compositeKey: CompositeKey) throws {
+        try self.write(to: output, compositeKey: compositeKey as KDBX.CompositeKey )
+    }
 }
 
 extension Element {

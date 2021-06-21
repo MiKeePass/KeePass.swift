@@ -56,10 +56,10 @@ class Database4: Database {
 
         document = try XML.Document(xml: stream.remaining.data, options: options)
     }
+
     func write(to output: Output, compositeKey: CompositeKey) throws {
         fatalError()
     }
-
 }
 
 private func Unhash(header: Bytes, data: Bytes, key: Bytes) throws -> Bytes {

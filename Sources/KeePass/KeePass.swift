@@ -40,18 +40,19 @@ public class KeePass {
             throw KeePassError.invalidFileFormat
         }
 
-        let format: FileFormat = try stream.read()
+        let format: UInt32 = try stream.read()
 
         switch format {
-        case .kdb:
+        case KDB.FileFormat:
             return AnyDatabase( try KDB.Database(from: stream, compositeKey: compositeKey) )
-        case .prekdbx, .kdbx:
+        case KDBX.BetaFileFormat, KDBX.FileFormat:
             return AnyDatabase ( try KDBX.File(from: stream, compositeKey: compositeKey) )
+        default:
+            throw KeePassError.invalidFileFormat
         }
     }
 
     public static func open(contentOf xml: URL) throws -> some Database {
         try KDBX.File(xml: xml)
     }
-
 }

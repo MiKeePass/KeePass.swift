@@ -34,16 +34,7 @@ public class Database {
 
         let data: Bytes = try input.read()
         let key = try header.masterKey(from: compositeKey)
-
-        let cipher: Cipher
-
-        if header.cipher.contains(.aes) {
-            cipher = try AESCipher(key: key, iv: header.initialVector)
-        } else if header.cipher.contains(.twofish) {
-            cipher = try Twofish(key: key, iv: header.initialVector)
-        } else {
-            throw KDBError.unsupportedCipher
-        }
+        let cipher = try header.cipher(key: key)
 
         let content = try cipher.decrypt(data: data)
 
@@ -69,36 +60,32 @@ public class Database {
 
     public func write(to output: Output, compositeKey: CompositeKey) throws {
 
-        func groups(in group: Group) -> UInt32 {
-            let count = UInt32(group.childs.count)
-            return group.childs.reduce(count) { $0 + groups(in: $1) }
+        func groups(in group: Group) -> [Group] {
+            return group.childs.reduce(group.childs) { $0 + groups(in: $1) }
         }
 
-        func entries(in group: Group) -> UInt32 {
-            let count = UInt32(group.entries.count)
-            return group.childs.reduce(count) { $0 + entries(in: $1) }
+        func entries(in group: Group) -> [Entry] {
+            return group.childs.reduce(group.entries) { $0 + entries(in: $1) }
         }
 
         let key = try header.masterKey(from: compositeKey)
-        let cipher: Cipher
+        let cipher = try header.cipher(key: key)
 
-        if header.cipher.contains(.aes) {
-            cipher = try AESCipher(key: key, iv: header.initialVector)
-        } else if header.cipher.contains(.twofish) {
-            cipher = try Twofish(key: key, iv: header.initialVector)
-        } else {
-            throw KDBError.unsupportedCipher
-        }
+        let groups = groups(in: root)
+        let entries = entries(in: root)
 
-        let content = try Data(from: root)
+        let content = Output()
+        try content.write(groups)
+        try content.write(entries)
+        guard var data = content.bytes else { throw KDBError.noData }
 
         var header = header
-        header.contentHash = SHA256.hash(content)
-        header.groups = groups(in: root)
-        header.entries = entries(in: root)
+        header.contentHash = SHA256.hash(data)
+        header.groups = UInt32(groups.count)
+        header.entries = UInt32(entries.count)
         try output.write(header)
 
-        let data = try cipher.encrypt(data: content)
+        data = try cipher.encrypt(data: data)
         try output.write(data)
     }
 
@@ -141,8 +128,4 @@ private func Root(from input: Input, groups: Int, entries: Int) throws -> Group 
     }
 
     return root
-}
-
-private func Data(from root: Group) throws -> Bytes {
-    fatalError()
 }

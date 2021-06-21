@@ -70,6 +70,18 @@ extension Header: Streamable {
 
 extension Header {
 
+    func cipher(key: Bytes) throws -> Cipher {
+        if cipher.contains(.aes) {
+            return try AESCipher(key: key, iv: initialVector)
+        }
+
+        if cipher.contains(.twofish) {
+            return try Twofish(key: key, iv: initialVector)
+        }
+
+        throw KDBError.unsupportedCipher
+    }
+
     func masterKey(from compositeKey: CompositeKey) throws -> Bytes {
         let key = try compositeKey.serialize()
 

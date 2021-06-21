@@ -25,4 +25,5 @@ public enum KDBError: Error {
     case emptyCompositeKey
     case invalidPassword
     case invalidKey
+    case noData
 }

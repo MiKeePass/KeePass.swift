@@ -20,9 +20,7 @@ import Foundation
 import Binary
 
 public let FileSignature: UInt32 = 0x9AA2D903
-
 public let BetaFileFormat: UInt32 = 0xB54BFB66
-
 public let FileFormat: UInt32 = 0xB54BFB67
 
 public struct Version {
@@ -75,10 +73,10 @@ public class File {
 
     public func write(to output: Output, compositeKey: CompositeKey) throws {
         try output.write(FileSignature)
-        try output.write(BetaFileFormat)
+        try output.write(FileFormat)
         try output.write(version)
+        try database.write(to: output, compositeKey: compositeKey)
     }
-
 }
 
 extension Version: Streamable {

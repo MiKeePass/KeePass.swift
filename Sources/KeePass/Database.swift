@@ -17,9 +17,12 @@
 // along with KeePass. If not, see <https://www.gnu.org/licenses/>.
 
 import Foundation
+import Binary
 
 public protocol Database {
     associatedtype Root: Group
 
     var root: Root { get }
+
+    func write(to output: Output, compositeKey: CompositeKey) throws
 }

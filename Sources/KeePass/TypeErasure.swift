@@ -17,6 +17,7 @@
 // along with KeePass. If not, see <https://www.gnu.org/licenses/>.
 
 import Foundation
+import Binary
 
 @inline(never)
 func _abstract(file: StaticString = #file, line: UInt = #line) -> Never {
@@ -27,12 +28,16 @@ func _abstract(file: StaticString = #file, line: UInt = #line) -> Never {
 
 class _AnyDatabaseBoxBase: Database {
     var root: AnyGroup { _abstract() }
+    func write(to output: Output, compositeKey: CompositeKey) throws { _abstract() }
 }
 
 final class _AnyDatabaseBox<Base>: _AnyDatabaseBoxBase where Base: Database {
     override var root: AnyGroup { AnyGroup( _base.root ) }
     var _base: Base
     init(_ base: Base) { _base = base }
+    override func write(to output: Output, compositeKey: CompositeKey) throws {
+        try _base.write(to: output, compositeKey: compositeKey)
+    }
 }
 
 class AnyDatabase: Database {
@@ -40,6 +45,9 @@ class AnyDatabase: Database {
     let _box: _AnyDatabaseBoxBase
     init<T>(_ base: T) where T: Database {
         _box = _AnyDatabaseBox(base)
+    }
+    func write(to output: Output, compositeKey: CompositeKey) throws {
+        try _box.write(to: output, compositeKey: compositeKey)
     }
 }
 

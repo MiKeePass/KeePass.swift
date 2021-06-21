@@ -22,7 +22,12 @@ import KDB
 
 extension CompositeKey: KDB.CompositeKey { }
 
-extension KDB.Database: Database {}
+extension KDB.Database: Database {
+
+    public func write(to output: Output, compositeKey: CompositeKey) throws {
+        try self.write(to: output, compositeKey: compositeKey as KDB.CompositeKey )
+    }
+}
 
 extension TLV where Type == KDB.Entry.Column {
 
