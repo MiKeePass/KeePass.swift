@@ -16,20 +16,20 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
+import Foundation
 import KDB
 import KDBX
 
-public let FileSignature: UInt32 = 0x9AA2D903
+public let FileSignature: UInt32 = 0x9AA2_D903
 
 public enum FileFormat: UInt32, Streamable {
-    case kdb        = 0xB54BFB65
-    case prekdbx    = 0xB54BFB66
-    case kdbx       = 0xB54BFB67
+    case kdb = 0xB54B_FB65
+    case prekdbx = 0xB54B_FB66
+    case kdbx = 0xB54B_FB67
 }
 
-public class KeePass {
+public enum KeePass {
 
     public static func open(contentOf url: URL, compositeKey: CompositeKey) throws -> some Database {
 
@@ -44,9 +44,9 @@ public class KeePass {
 
         switch format {
         case KDB.FileFormat:
-            return AnyDatabase( try KDB.Database(from: stream, compositeKey: compositeKey) )
+            return AnyDatabase(try KDB.Database(from: stream, compositeKey: compositeKey))
         case KDBX.BetaFileFormat, KDBX.FileFormat:
-            return AnyDatabase ( try KDBX.File(from: stream, compositeKey: compositeKey) )
+            return AnyDatabase(try KDBX.File(from: stream, compositeKey: compositeKey))
         default:
             throw KeePassError.invalidFileFormat
         }

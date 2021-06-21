@@ -62,7 +62,6 @@ extension TLV: Readable where Type: Readable, Lenght: Readable {
         let lenght = try input.read() as Lenght
         value = try input.read(lenght: Int(lenght))
     }
-
 }
 
 extension TLV: Writable where Type: Writable, Lenght: Writable {
@@ -72,7 +71,6 @@ extension TLV: Writable where Type: Writable, Lenght: Writable {
         try output.write(Lenght(value.lenght))
         try output.write(value)
     }
-
 }
 
 extension Sequence where Element: TypeLenghtValue, Element.Type_: Equatable, Element.Value == Bytes {
@@ -81,11 +79,14 @@ extension Sequence where Element: TypeLenghtValue, Element.Type_: Equatable, Ele
         return try first(where: { $0.type == type }).map { try T($0.value) }
     }
 
-    public func first<T>(where type: Element.Type_, _ predicate: (T) throws -> Bool) throws -> Element? where T: BytesRepresentable {
+    public func first<T>(where type: Element.Type_, _ predicate: (T) throws -> Bool) throws -> Element?
+        where T: BytesRepresentable {
         return try first(where: { try predicate(try T($0.value)) })
     }
 
-    public func sorted<T>(field: Element.Type_, by areInIncreasingOrder: (T, T) throws -> Bool) throws -> [Self.Element] where T: BytesRepresentable {
+    public func sorted<T>(field: Element.Type_,
+                          by areInIncreasingOrder: (T, T) throws -> Bool) throws -> [Self.Element]
+        where T: BytesRepresentable {
         return try sorted(by: { try areInIncreasingOrder(try T($0.value), try T($1.value)) })
     }
 
@@ -99,7 +100,6 @@ extension RangeReplaceableCollection where Element: TypeLenghtValue, Element.Typ
     public mutating func removeAll(_ type: Element.Type_) {
         removeAll(where: { $0.type == type })
     }
-
 }
 
 extension TLV: CustomDebugStringConvertible {

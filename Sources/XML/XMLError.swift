@@ -17,10 +17,10 @@ public enum XMLError: Error {
 
     /// This will be inside `error` property of `XMLElement` when subscript is used for not-existing element.
     case elementNotFound
-    
+
     /// This will be inside `error` property of `XMLDocument` when there is no root element.
     case rootElementMissing
-    
+
     /// `XMLDocument` can throw this error on `init` or `loadXMLData` if parsing with `XMLParser` was not successful.
     case parsingFailed
 }

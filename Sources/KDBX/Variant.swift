@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
+import Foundation
 
 public enum Variant {
 
@@ -36,14 +36,14 @@ public enum Variant {
     case Bytes(Bytes)
 
     enum ID: UInt8, Streamable {
-        case End     = 0x00
-        case Bool    = 0x08
-        case UInt32  = 0x04
-        case UInt64  = 0x05
-        case Int32   = 0x0C
-        case Int64   = 0x0D
-        case String  = 0x18
-        case Bytes   = 0x42
+        case End = 0x00
+        case Bool = 0x08
+        case UInt32 = 0x04
+        case UInt64 = 0x05
+        case Int32 = 0x0C
+        case Int64 = 0x0D
+        case String = 0x18
+        case Bytes = 0x42
     }
 
     var id: ID {
@@ -138,7 +138,6 @@ public enum Variant {
         guard case let .Bytes(bytes) = self else { throw KDBXError.invalidValue }
         return try T(bytes)
     }
-
 }
 
 extension Variant: Writable {
@@ -184,36 +183,35 @@ extension Variant: Writable {
         case .End:
             try output.write(id)
 
-        case .Bool(let value):
+        case let .Bool(value):
             try output.write(MemoryLayout<Bool>.size)
             try output.write(value)
 
-        case .UInt32(let value):
+        case let .UInt32(value):
             try output.write(MemoryLayout<UInt32>.size)
             try output.write(value)
 
-        case .UInt64(let value):
+        case let .UInt64(value):
             try output.write(MemoryLayout<UInt64>.size)
             try output.write(value)
 
-        case .Int32(let value):
+        case let .Int32(value):
             try output.write(MemoryLayout<Int32>.size)
             try output.write(value)
 
-        case .Int64(let value):
+        case let .Int64(value):
             try output.write(MemoryLayout<Int64>.size)
             try output.write(value)
 
-        case .String(let value):
+        case let .String(value):
             try output.write(Swift.UInt32(value.count))
             try output.write(value)
 
-        case .Bytes(let value):
+        case let .Bytes(value):
             try output.write(Swift.UInt32(value.lenght))
             try output.write(value)
         }
     }
-
 }
 
 extension Variant.Version: Streamable {
@@ -227,7 +225,6 @@ extension Variant.Version: Streamable {
         try output.write(minor)
         try output.write(major)
     }
-
 }
 
 extension Dictionary: Streamable where Key == String, Value == Variant {
@@ -254,7 +251,7 @@ extension Dictionary: Streamable where Key == String, Value == Variant {
     public func write(to output: Output) throws {
         let version = Variant.Version(major: 1, minor: 0)
         try output.write(version)
-        
+
         try forEach {
             try output.write($0.value.id)
             try output.write(UInt32($0.key.count))
@@ -264,7 +261,6 @@ extension Dictionary: Streamable where Key == String, Value == Variant {
 
         try output.write(Variant.End)
     }
-
 }
 
 extension Dictionary: BytesRepresentable where Key == String, Value == Variant {
@@ -279,5 +275,4 @@ extension Dictionary: BytesRepresentable where Key == String, Value == Variant {
         try? output.write(self)
         return output.bytes ?? []
     }
-
 }

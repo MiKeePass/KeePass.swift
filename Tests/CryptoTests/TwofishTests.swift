@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import XCTest
 import Binary
+import XCTest
 
 @testable import Crypto
 
@@ -334,5 +334,4 @@ class TwofishTests: XCTestCase {
     // static var allTests = [
     //     ("testSalsa20", testSalsa20),
     // ]
-
 }

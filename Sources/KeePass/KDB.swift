@@ -16,16 +16,16 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePass. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
+import Foundation
 import KDB
 
-extension CompositeKey: KDB.CompositeKey { }
+extension CompositeKey: KDB.CompositeKey {}
 
 extension KDB.Database: Database {
 
     public func write(to output: Output, compositeKey: CompositeKey) throws {
-        try self.write(to: output, compositeKey: compositeKey as KDB.CompositeKey )
+        try write(to: output, compositeKey: compositeKey as KDB.CompositeKey)
     }
 }
 
@@ -64,7 +64,7 @@ extension KDB.Group: Group {
 
     public var icon: Int {
         get { self[.iconID] ?? 0 }
-        set { self[.iconID] =  newValue }
+        set { self[.iconID] = newValue }
     }
 
     public var groups: [KDB.Group] { childs }
@@ -73,7 +73,7 @@ extension KDB.Group: Group {
 extension KDB.Entry: Entry {
 
     public var times: Timestamp {
-         return self
+        return self
     }
 
     public var fields: [Field] {
@@ -84,7 +84,6 @@ extension KDB.Entry: Entry {
         guard let field = TLV<Column, UInt32>(field) else { return }
         set(field)
     }
-
 }
 
 extension KDB.Entry: Timestamp {
@@ -105,9 +104,8 @@ extension KDB.Entry: Timestamp {
 
     public var expirationDate: Date? {
         get { nil }
-        set { }
+        set {}
     }
-
 }
 
 extension Field {

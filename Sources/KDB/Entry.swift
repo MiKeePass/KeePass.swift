@@ -16,28 +16,28 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
+import Foundation
 
 public final class Entry: Row, Streamable {
 
     public enum Column: UInt16, Streamable, Endable {
-        case reserved           = 0x0000
-        case uuid               = 0x0001
-        case groupID            = 0x0002
-        case iconID             = 0x0003
-        case title              = 0x0004
-        case url                = 0x0005
-        case username           = 0x0006
-        case password           = 0x0007
-        case notes              = 0x0008
-        case creationTime       = 0x0009
-        case lastModifiedTime   = 0x000A
-        case lastAccessTime     = 0x000B
-        case expirationTime     = 0x000C
-        case binaryDesc         = 0x000D
-        case binaryData         = 0x000E
-        case end                = 0xFFFF
+        case reserved = 0x0000
+        case uuid = 0x0001
+        case groupID = 0x0002
+        case iconID = 0x0003
+        case title = 0x0004
+        case url = 0x0005
+        case username = 0x0006
+        case password = 0x0007
+        case notes = 0x0008
+        case creationTime = 0x0009
+        case lastModifiedTime = 0x000A
+        case lastAccessTime = 0x000B
+        case expirationTime = 0x000C
+        case binaryDesc = 0x000D
+        case binaryData = 0x000E
+        case end = 0xFFFF
 
         public static var endValue: Self { .end }
     }
@@ -74,5 +74,4 @@ extension Entry: Hashable {
         hasher.combine(self[.uuid])
         hasher.combine(self[.title])
     }
-
 }

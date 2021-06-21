@@ -16,9 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
 import Crypto
+import Foundation
 import Gzip
 import XML
 
@@ -38,7 +38,7 @@ class Database3: Database {
         let data = try input.read() as Bytes
 
         var key = try header.masterKey(from: compositeKey)
-        key = SHA256.hash( key )
+        key = SHA256.hash(key)
 
         let cipher = try header.cipher(key: key)
 
@@ -59,7 +59,7 @@ class Database3: Database {
             guard size > 0 else { break }
 
             let block = try stream.read(lenght: Int(size))
-            guard SHA256.hash( block ) == hash else { throw KDBXError.corruptedDatabase }
+            guard SHA256.hash(block) == hash else { throw KDBXError.corruptedDatabase }
             content += block
         }
 

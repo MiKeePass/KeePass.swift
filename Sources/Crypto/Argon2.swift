@@ -16,9 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
-import Binary
 import Argon2
+import Binary
+import Foundation
 
 public final class Argon2: KeyDerivation {
 
@@ -56,5 +56,3 @@ public final class Argon2: KeyDerivation {
         return out
     }
 }
-
-

@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
+import Foundation
 import Twofish
 
 public final class Twofish: Cipher {
@@ -51,5 +51,4 @@ public final class Twofish: Cipher {
         twofish_decrypt(&context, data.rawValue, output_length, &out.rawValue, &output_length)
         return out.prefix(output_length)
     }
-    
 }

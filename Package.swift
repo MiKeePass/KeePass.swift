@@ -11,68 +11,81 @@ let package = Package(
         // The `Binary` manipulate bytes with ease.
         .library(
             name: "Binary",
-            targets: ["Binary"]),
+            targets: ["Binary"]
+        ),
 
         // `Crypto` defines cryptographic interfaces used by KeePass.
         .library(
             name: "Crypto",
-            targets: ["Crypto"]),
+            targets: ["Crypto"]
+        ),
 
         // `KeePass` library defines interfaces to work with KeePass files.
         .library(
             name: "KeePass",
-            targets: ["KeePass"]),
+            targets: ["KeePass"]
+        ),
     ],
 
     targets: [
 
         .target(
             name: "KeePass",
-            dependencies: [ "Binary",
-                            "KDB",
-                            "KDBX"]),
+            dependencies: ["Binary",
+                           "KDB",
+                           "KDBX"]
+        ),
         .testTarget(
             name: "KeePassTests",
             dependencies: ["KeePass"],
-            resources: [ .process("Fixtures") ]),
+            resources: [.process("Fixtures")]
+        ),
 
         .target(
             name: "KDB",
-            dependencies: [ "Binary",
-                            "Crypto"]),
+            dependencies: ["Binary",
+                           "Crypto"]
+        ),
 
         .target(
             name: "KDBX",
-            dependencies: [ "Binary",
-                            "Crypto",
-                            "Gzip",
-                            "XML"]),
+            dependencies: ["Binary",
+                           "Crypto",
+                           "Gzip",
+                           "XML"]
+        ),
 
         .target(
             name: "Binary",
-            dependencies: []),
+            dependencies: []
+        ),
         .testTarget(
             name: "BinaryTests",
-            dependencies: ["Binary"]),
+            dependencies: ["Binary"]
+        ),
 
         .target(
             name: "Crypto",
-            dependencies: [ "Binary", 
-                            "Sodium", 
-                            "Argon2", 
-                            "Twofish"]),
+            dependencies: ["Binary",
+                           "Sodium",
+                           "Argon2",
+                           "Twofish"]
+        ),
         .testTarget(
             name: "CryptoTests",
-            dependencies: ["Crypto"]),
+            dependencies: ["Crypto"]
+        ),
 
         .target(
             name: "Gzip",
             dependencies: ["Binary"],
-            exclude: ["LICENSE"]),
+            exclude: ["LICENSE"]
+        ),
 
         .target(
             name: "XML",
-            dependencies: []),
+            dependencies: []
+        ),
 
         // MARK: KeePass Cryptographic Libraries
 
@@ -82,16 +95,19 @@ let package = Package(
             exclude: ["LICENSE"],
             cSettings: [
                 .headerSearchPath("include/sodium"),
-                .define("CONFIGURED")
-            ]),
+                .define("CONFIGURED"),
+            ]
+        ),
 
         .target(
             name: "Argon2",
             dependencies: [],
-            exclude: ["LICENSE"]),
+            exclude: ["LICENSE"]
+        ),
 
         .target(
             name: "Twofish",
-            dependencies: []),
+            dependencies: []
+        ),
     ]
 )

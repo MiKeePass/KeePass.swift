@@ -16,12 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
 import Crypto
+import Foundation
 
-public let FileSignature: UInt32 = 0x9AA2D903
-public let FileFormat: UInt32 = 0xB54BFB65
+public let FileSignature: UInt32 = 0x9AA2_D903
+public let FileFormat: UInt32 = 0xB54B_FB65
 
 public class Database {
 
@@ -43,7 +43,7 @@ public class Database {
         }
 
         let stream = Input(bytes: content)
-        self.root = try Root(from: stream, groups: Int(header.groups), entries: Int(header.entries))
+        root = try Root(from: stream, groups: Int(header.groups), entries: Int(header.entries))
     }
 
     public convenience init(from file: URL, compositeKey: CompositeKey) throws {
@@ -88,7 +88,6 @@ public class Database {
         data = try cipher.encrypt(data: data)
         try output.write(data)
     }
-
 }
 
 private func Root(from input: Input, groups: Int, entries: Int) throws -> Group {
@@ -107,7 +106,7 @@ private func Root(from input: Input, groups: Int, entries: Int) throws -> Group 
             continue
         }
 
-        for (j, parent) in groups[0..<i].enumerated().reversed() {
+        for (j, parent) in groups[0 ..< i].enumerated().reversed() {
             guard let level2: UInt16 = parent[.groupLevel] else { throw KDBError.corruptedDatabase }
 
             if level2 < level1 {
@@ -118,7 +117,6 @@ private func Root(from input: Input, groups: Int, entries: Int) throws -> Group 
 
             guard j > 0 else { throw KDBError.corruptedDatabase }
         }
-
     }
 
     for entry in entries {

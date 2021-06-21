@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePass. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
+import Foundation
 
 public protocol Database {
     associatedtype Root: Group

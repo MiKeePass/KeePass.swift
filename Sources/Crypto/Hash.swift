@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
+import Foundation
 import Sodium
 
 public final class SHA256 {
@@ -38,7 +38,7 @@ public final class SHA256 {
     }
 
     public func update(_ bytes: Bytes) {
-        crypto_hash_sha256_update(&state, bytes.rawValue, lenght(bytes));
+        crypto_hash_sha256_update(&state, bytes.rawValue, lenght(bytes))
     }
 
     public static func hash(_ bytes: Bytes) -> Bytes {
@@ -46,7 +46,6 @@ public final class SHA256 {
         crypto_hash_sha256(&out.rawValue, bytes.rawValue, lenght(bytes))
         return out
     }
-
 }
 
 public final class SHA512 {
@@ -67,7 +66,7 @@ public final class SHA512 {
     }
 
     public func update(_ bytes: Bytes) {
-        crypto_hash_sha512_update(&state, bytes.rawValue, lenght(bytes));
+        crypto_hash_sha512_update(&state, bytes.rawValue, lenght(bytes))
     }
 
     public static func hash(_ bytes: Bytes) -> Bytes {
@@ -75,7 +74,6 @@ public final class SHA512 {
         crypto_hash_sha512(&out.rawValue, bytes.rawValue, lenght(bytes))
         return out
     }
-
 }
 
 public final class HMACSHA256 {
@@ -96,7 +94,7 @@ public final class HMACSHA256 {
     }
 
     public func update(_ bytes: Bytes) {
-        crypto_auth_hmacsha256_update(&state, bytes.rawValue, lenght(bytes));
+        crypto_auth_hmacsha256_update(&state, bytes.rawValue, lenght(bytes))
     }
 
     public static func authenticate(_ bytes: Bytes, key: Bytes) -> Bytes {
@@ -104,5 +102,4 @@ public final class HMACSHA256 {
         hmac.update(bytes)
         return hmac.final
     }
-
 }

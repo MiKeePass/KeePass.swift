@@ -54,7 +54,6 @@ extension Readable where Self: BytesRepresentable {
         let bytes = try input.read(lenght: MemoryLayout<Self>.size)
         self = try Self(bytes)
     }
-
 }
 
 extension Writable where Self: BytesRepresentable {
@@ -62,40 +61,39 @@ extension Writable where Self: BytesRepresentable {
     public func write(to output: Output) throws {
         try output.write(bytes)
     }
-
 }
 
 // MARK: - Streamable Boolean
 
-extension Bool: Streamable { }
+extension Bool: Streamable {}
 
 // MARK: - Streamable Integer
 
-extension Int: Streamable { }
+extension Int: Streamable {}
 
-extension Int8: Streamable { }
+extension Int8: Streamable {}
 
-extension Int16: Streamable { }
+extension Int16: Streamable {}
 
-extension Int32: Streamable { }
+extension Int32: Streamable {}
 
-extension Int64: Streamable { }
+extension Int64: Streamable {}
 
-extension UInt: Streamable { }
+extension UInt: Streamable {}
 
-extension UInt8: Streamable { }
+extension UInt8: Streamable {}
 
-extension UInt16: Streamable { }
+extension UInt16: Streamable {}
 
-extension UInt32: Streamable { }
+extension UInt32: Streamable {}
 
-extension UInt64: Streamable { }
+extension UInt64: Streamable {}
 
 // MARK: - Streamable Floating Point
 
-extension Double: Streamable { }
+extension Double: Streamable {}
 
-extension Float: Streamable { }
+extension Float: Streamable {}
 
 // MARK: - Streamable RawRepresentable
 
@@ -106,7 +104,6 @@ extension Readable where Self: RawRepresentable, RawValue: Readable {
         guard let value = Self(rawValue: rawValue) else { throw BinaryError.invalidValue }
         self = value
     }
-
 }
 
 extension Writable where Self: RawRepresentable, RawValue: Writable {
@@ -124,7 +121,6 @@ extension Readable where Self: OptionSet, RawValue: Readable {
         let rawValue = try RawValue(from: input)
         self = Self(rawValue: rawValue)
     }
-
 }
 
 // MARK: - Writable Array
@@ -134,7 +130,6 @@ extension Array: Writable where Element: Writable {
     public func write(to output: Output) throws {
         try forEach(output.write)
     }
-
 }
 
 // MARK: - Streamable String
@@ -149,7 +144,6 @@ extension String: Streamable {
     public func bytes(using encoding: String.Encoding = .utf8) -> Bytes? {
         data(using: encoding)?.bytes
     }
-
 }
 
 // MARK: - Streamable Data
@@ -165,12 +159,11 @@ extension Data: Streamable {
         let bytes = Bytes(data: self)
         try output.write(bytes)
     }
-
 }
 
 // MARK: - Streamable UUID
 
-extension UUID: Streamable { }
+extension UUID: Streamable {}
 
 // MARK: - Streamable Bytes
 
@@ -183,6 +176,4 @@ extension Bytes: Streamable {
     public func write(to output: Output) throws {
         try output.write(self)
     }
-
 }
-

@@ -16,9 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
-import CommonCrypto
 import Argon2
+import CommonCrypto
+import Foundation
 
 public enum CryptoError: Error {
     case keyLenght(expecting: String, got: Int)

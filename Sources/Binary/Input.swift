@@ -70,5 +70,4 @@ public class Input {
 
         return array
     }
-
 }

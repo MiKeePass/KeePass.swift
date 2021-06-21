@@ -23,7 +23,7 @@ public protocol Group {
     associatedtype Entries: RandomAccessCollection where Entries.Element: Entry
 
     associatedtype Groups: RandomAccessCollection where Groups.Element: Group
-    
+
     var title: String { get set }
 
     var icon: Int { get set }

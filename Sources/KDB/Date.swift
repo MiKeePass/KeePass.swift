@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
+import Foundation
 
 extension Database {
 
@@ -35,12 +35,12 @@ extension Database {
     public static func date(from bytes: Bytes) -> Date? {
         guard bytes.count > 4 else { return nil }
 
-        let year    = ( Int(bytes[0]) << 6) | (Int(bytes[1]) >> 2)
-        let month   = ((Int(bytes[1]) & 0x00000003) << 2) | (Int(bytes[2]) >> 6)
-        let day     = ( Int(bytes[2]) >> 1) & 0x0000001F
-        let hour    = ((Int(bytes[2]) & 0x00000001) << 4) | (Int(bytes[3]) >> 4)
-        let minute  = ((Int(bytes[3]) & 0x0000000F) << 2) | (Int(bytes[4]) >> 6)
-        let second  =   Int(bytes[4]) & 0x0000003F
+        let year = (Int(bytes[0]) << 6) | (Int(bytes[1]) >> 2)
+        let month = ((Int(bytes[1]) & 0x0000_0003) << 2) | (Int(bytes[2]) >> 6)
+        let day = (Int(bytes[2]) >> 1) & 0x0000_001F
+        let hour = ((Int(bytes[2]) & 0x0000_0001) << 4) | (Int(bytes[3]) >> 4)
+        let minute = ((Int(bytes[3]) & 0x0000_000F) << 2) | (Int(bytes[4]) >> 6)
+        let second = Int(bytes[4]) & 0x0000_003F
 
         return DateComponents(calendar: Calendar(identifier: .iso8601),
                               year: year,
@@ -50,17 +50,16 @@ extension Database {
                               minute: minute,
                               second: second,
                               nanosecond: 0).date
-
     }
 
     public static func bytes(from date: Date) -> Bytes {
         let calendar = Calendar(identifier: .iso8601)
         let components = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
 
-        let year   = components.year!
-        let month  = UInt8(components.month!)
-        let day    = UInt8(components.day!)
-        let hour   = UInt8(components.hour!)
+        let year = components.year!
+        let month = UInt8(components.month!)
+        let day = UInt8(components.day!)
+        let hour = UInt8(components.hour!)
         let minute = UInt8(components.minute!)
         let second = UInt8(components.second!)
 
@@ -71,6 +70,5 @@ extension Database {
         bytes[3] = (hour & 0x0F) << 4 | ((minute >> 2) & 0x0F)
         bytes[4] = ((minute & 0x03) << 6) | (second & 0x3F)
         return bytes
-
     }
 }

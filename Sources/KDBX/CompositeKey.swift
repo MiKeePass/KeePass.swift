@@ -40,7 +40,7 @@ extension CompositeKey {
         let hash = SHA256()
 
         if !password.isEmpty {
-            hash.update( SHA256.hash(password) )
+            hash.update(SHA256.hash(password))
         }
 
         if !key.isEmpty {
@@ -49,5 +49,4 @@ extension CompositeKey {
 
         return hash.final
     }
-
 }

@@ -16,9 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
 import CommonCrypto
+import Foundation
 
 public final class AESCipher: Cipher {
 
@@ -82,7 +82,6 @@ public final class AESCipher: Cipher {
 
         return out.prefix(count)
     }
-
 }
 
 public final class AESKeyDerivation: KeyDerivation {
@@ -133,5 +132,4 @@ public final class AESKeyDerivation: KeyDerivation {
 
         return SHA256.hash(out)
     }
-
 }

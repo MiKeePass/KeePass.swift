@@ -16,9 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
 import Crypto
+import Foundation
 import XML
 
 class Database4: Database {
@@ -40,7 +40,7 @@ class Database4: Database {
                                  data: try input.read(),
                                  key: masterKey)
 
-        let key = SHA256.hash( masterKey )
+        let key = SHA256.hash(masterKey)
         let cipher = try outerHeader.cipher(key: key)
         content = try cipher.decrypt(data: content)
 
@@ -65,11 +65,11 @@ class Database4: Database {
 private func Unhash(header: Bytes, data: Bytes, key: Bytes) throws -> Bytes {
     let stream = Input(bytes: data)
 
-    let key = SHA512.hash( key + 1 )
+    let key = SHA512.hash(key + 1)
     let hmacKey = HmacKey(block: .max, key: key)
 
     guard
-        try stream.read(lenght: SHA256.Lenght) == SHA256.hash( header ),
+        try stream.read(lenght: SHA256.Lenght) == SHA256.hash(header),
         try stream.read(lenght: HMACSHA256.Lenght) == HMACSHA256.authenticate(header, key: hmacKey)
     else { throw KDBXError.invalidCompositeKey }
 

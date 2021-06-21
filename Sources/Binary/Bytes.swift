@@ -47,7 +47,7 @@ public struct Bytes: RawRepresentable {
     }
 
     public init(slice: ArraySlice<UInt8>) {
-        self.rawValue = [UInt8](slice)
+        rawValue = [UInt8](slice)
     }
 
     public init(lenght: Int) {
@@ -59,13 +59,13 @@ public struct Bytes: RawRepresentable {
     }
 
     public init(random lenght: Int) throws {
-        self.rawValue = (0..<lenght).map { _ in 
-            UInt8.random(in: UInt8.min...UInt8.max)
+        rawValue = (0 ..< lenght).map { _ in
+            UInt8.random(in: UInt8.min ... UInt8.max)
         }
     }
 
     public init(data: Data) {
-        self.rawValue = data.withUnsafeBytes { Array($0) }
+        rawValue = data.withUnsafeBytes { Array($0) }
     }
 
     public init(contentsOf url: URL) throws {
@@ -93,7 +93,7 @@ public struct Bytes: RawRepresentable {
         let step = utf8.startIndex.advanced(by: 2)
 
         for index in stride(from: start, to: end, by: step) {
-            let hex = "\( UnicodeScalar(utf8[index]) )\( UnicodeScalar(utf8[index.advanced(by: 1)]) )"
+            let hex = "\(UnicodeScalar(utf8[index]))\(UnicodeScalar(utf8[index.advanced(by: 1)]))"
             guard let byte = UInt8(hex, radix: 16) else { return nil }
             array.append(byte)
         }
@@ -101,12 +101,12 @@ public struct Bytes: RawRepresentable {
         rawValue = array
     }
 
-    public subscript (index: Int) -> UInt8 {
+    public subscript(index: Int) -> UInt8 {
         get { rawValue[index] }
         set { rawValue[index] = newValue }
     }
 
-    public subscript (range: CountableRange<Int>) -> Bytes {
+    public subscript(range: CountableRange<Int>) -> Bytes {
         Bytes(slice: rawValue[range])
     }
 
@@ -114,7 +114,7 @@ public struct Bytes: RawRepresentable {
         rawValue.append(byte)
     }
 
-    public mutating func append(_ bytes: Array<UInt8>) {
+    public mutating func append(_ bytes: [UInt8]) {
         rawValue.append(contentsOf: bytes)
     }
 
@@ -151,7 +151,6 @@ public struct Bytes: RawRepresentable {
     public static func += (lhs: inout Bytes, rhs: UInt8) {
         lhs.append(rhs)
     }
-
 }
 
 extension Bytes: Sequence {
@@ -186,7 +185,6 @@ extension Bytes: Sequence {
     public func withContiguousStorageIfAvailable<R>(_ body: (UnsafeBufferPointer<UInt8>) throws -> R) rethrows -> R? {
         try rawValue.withContiguousStorageIfAvailable(body)
     }
-
 }
 
 extension Bytes: ExpressibleByArrayLiteral {
@@ -220,7 +218,6 @@ extension Bytes: DataProtocol {
     public var startIndex: Int { rawValue.startIndex }
 
     public var endIndex: Int { rawValue.endIndex }
-
 }
 
 extension Bytes: Hashable {
@@ -241,5 +238,4 @@ extension Bytes: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(rawValue)
     }
-
 }

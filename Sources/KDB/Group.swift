@@ -16,23 +16,23 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
+import Foundation
 
 public final class Group: Row, Streamable {
 
     public enum Column: UInt16, Streamable, Endable {
-        case reserved           = 0x0000
-        case groupID            = 0x0001
-        case name               = 0x0002
-        case creationTime       = 0x0003
-        case lastModifiedTime   = 0x0004
-        case lastAccessTime     = 0x0005
-        case expirationTime     = 0x0006
-        case iconID             = 0x0007
-        case groupLevel         = 0x0008
-        case groupFlags         = 0x0009
-        case end                = 0xFFFF
+        case reserved = 0x0000
+        case groupID = 0x0001
+        case name = 0x0002
+        case creationTime = 0x0003
+        case lastModifiedTime = 0x0004
+        case lastAccessTime = 0x0005
+        case expirationTime = 0x0006
+        case iconID = 0x0007
+        case groupLevel = 0x0008
+        case groupFlags = 0x0009
+        case end = 0xFFFF
 
         public static var endValue: Self { .end }
     }
@@ -84,7 +84,7 @@ extension Group: Hashable {
 
     public static func == (lhs: Group, rhs: Group) -> Bool {
         lhs[.groupID] == rhs[.groupID] &&
-        lhs[.groupLevel] == rhs[.groupLevel]
+            lhs[.groupLevel] == rhs[.groupLevel]
     }
 
     public func hash(into hasher: inout Hasher) {

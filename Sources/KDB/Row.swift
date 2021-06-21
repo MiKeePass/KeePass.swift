@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
+import Foundation
 
 public protocol Row: AnyObject {
     associatedtype Column
@@ -70,18 +70,19 @@ extension Row where Column: Equatable {
 
 extension Sequence where Element: Row, Element.Column: Equatable {
 
-    public func first<T>(column: Element.Column, where predicate: (T) throws -> Bool) throws -> Element? where T: BytesRepresentable {
+    public func first<T>(column: Element.Column, where predicate: (T) throws -> Bool) throws -> Element?
+        where T: BytesRepresentable {
         try first(where: {
             guard let bytes = $0[column] else { return false }
             return try predicate(T(bytes))
         })
     }
 
-    public func sorted<T>(column: Element.Column, by areInIncreasingOrder: (T, T) throws -> Bool) throws -> [Element] where T: BytesRepresentable {
+    public func sorted<T>(column: Element.Column, by areInIncreasingOrder: (T, T) throws -> Bool) throws -> [Element]
+        where T: BytesRepresentable {
         try sorted(by: {
             guard let rhs = $0[column], let lhs = $1[column] else { return false }
-            return try areInIncreasingOrder(T(rhs),T(lhs))
+            return try areInIncreasingOrder(T(rhs), T(lhs))
         })
     }
-
 }

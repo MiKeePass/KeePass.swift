@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
+import Foundation
 import Sodium
 
 public final class ChaCha20 {
@@ -31,7 +31,7 @@ public final class ChaCha20 {
         guard key.lenght == crypto_stream_chacha20_ietf_KEYBYTES else {
             throw CryptoError.keyLenght(expecting: "Equal \(crypto_stream_chacha20_ietf_KEYBYTES)", got: key.lenght)
         }
-        
+
         guard nonce.lenght == crypto_stream_chacha20_ietf_NONCEBYTES else {
             throw CryptoError.ivLenght(expecting: "Equal \(crypto_stream_chacha20_ietf_NONCEBYTES)", got: nonce.lenght)
         }
@@ -39,14 +39,13 @@ public final class ChaCha20 {
         self.key = key
         self.nonce = nonce
     }
-
 }
 
 extension ChaCha20: Cipher {
 
     public func encrypt(data: Bytes) throws -> Bytes {
         var out = Bytes(lenght: lenght(data))
-        crypto_stream_chacha20_ietf_xor(&out.rawValue, data.rawValue, lenght(data), nonce.rawValue, key.rawValue);
+        crypto_stream_chacha20_ietf_xor(&out.rawValue, data.rawValue, lenght(data), nonce.rawValue, key.rawValue)
         return out
     }
 

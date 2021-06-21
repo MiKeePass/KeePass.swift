@@ -45,6 +45,6 @@ extension CompositeKey {
             return key
         }
 
-        return SHA256.hash( SHA256.hash(password) + key )
+        return SHA256.hash(SHA256.hash(password) + key)
     }
 }

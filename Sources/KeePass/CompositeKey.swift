@@ -16,9 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePass. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
 import Crypto
+import Foundation
 import XML
 
 public struct CompositeKey {
@@ -31,13 +31,14 @@ public struct CompositeKey {
 
     public init(password: String) {
         self.password = password
-        self.key = []
+        key = []
     }
 
     public init(password: String, key: Data) {
         self.password = password
 
-        if let xml = try? XML.Document(xml: key), let base64: String = try? xml.KeyFile.Key.Data.get(), let key = Bytes(base64Encoded: base64) {
+        if let xml = try? XML.Document(xml: key), let base64: String = try? xml.KeyFile.Key.Data.get(),
+           let key = Bytes(base64Encoded: base64) {
             // KeePass 2 XML key file
             self.key = key
 
@@ -45,7 +46,8 @@ public struct CompositeKey {
             // Fixed 32 byte binary
             self.key = Bytes(data: key)
 
-        } else if key.count == 2 * CompositeKey.KeyLength, let hex = String(data: key, encoding: .ascii), let key = Bytes(hex: hex) {
+        } else if key.count == 2 * CompositeKey.KeyLength, let hex = String(data: key, encoding: .ascii),
+                  let key = Bytes(hex: hex) {
             // Fixed 32 byte ASCII hex-encoded binary
             self.key = key
 
@@ -60,5 +62,4 @@ public struct CompositeKey {
         let key = try Data(contentsOf: url)
         self.init(password: password, key: key)
     }
-
 }

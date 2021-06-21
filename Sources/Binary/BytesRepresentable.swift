@@ -55,25 +55,25 @@ extension BytesRepresentable where Self: BinaryInteger {
     }
 }
 
-extension Int: BytesRepresentable { }
+extension Int: BytesRepresentable {}
 
-extension Int8: BytesRepresentable { }
+extension Int8: BytesRepresentable {}
 
-extension Int16: BytesRepresentable { }
+extension Int16: BytesRepresentable {}
 
-extension Int32: BytesRepresentable { }
+extension Int32: BytesRepresentable {}
 
-extension Int64: BytesRepresentable { }
+extension Int64: BytesRepresentable {}
 
-extension UInt: BytesRepresentable { }
+extension UInt: BytesRepresentable {}
 
-extension UInt8: BytesRepresentable { }
+extension UInt8: BytesRepresentable {}
 
-extension UInt16: BytesRepresentable { }
+extension UInt16: BytesRepresentable {}
 
-extension UInt32: BytesRepresentable { }
+extension UInt32: BytesRepresentable {}
 
-extension UInt64: BytesRepresentable { }
+extension UInt64: BytesRepresentable {}
 
 // MARK: - Streamable Floating Point
 
@@ -89,9 +89,9 @@ extension BytesRepresentable where Self: FloatingPoint {
     }
 }
 
-extension Double: BytesRepresentable { }
+extension Double: BytesRepresentable {}
 
-extension Float: BytesRepresentable { }
+extension Float: BytesRepresentable {}
 
 // MARK: - RawRepresentable Bytes
 

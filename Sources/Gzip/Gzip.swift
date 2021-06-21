@@ -26,13 +26,13 @@
  THE SOFTWARE.
  */
 
-import Foundation
 import Binary
+import Foundation
 
 #if os(Linux)
-    import zlibLinux
+import zlibLinux
 #else
-    import zlib
+import zlib
 #endif
 
 /// Compression level whose rawValue is based on the zlib's constants.
@@ -52,9 +52,7 @@ public struct CompressionLevel: RawRepresentable {
     public init(rawValue: Int32) {
         self.rawValue = rawValue
     }
-
 }
-
 
 /// Errors on gzipping/gunzipping based on the zlib error codes.
 public struct GzipError: Swift.Error {
@@ -101,14 +99,14 @@ public struct GzipError: Swift.Error {
 
     internal init(code: Int32, msg: UnsafePointer<CChar>?) {
 
-        self.message = {
+        message = {
             guard let msg = msg, let message = String(validatingUTF8: msg) else {
                 return "Unknown gzip error"
             }
             return message
         }()
 
-        self.kind = {
+        kind = {
             switch code {
             case Z_STREAM_ERROR:
                 return .stream
@@ -127,14 +125,13 @@ public struct GzipError: Swift.Error {
     }
 
     public var localizedDescription: String { message }
-
 }
 
 extension Bytes {
 
     /// Whether the receiver is compressed in gzip format.
     public var isGzipped: Bool {
-        starts(with: [0x1f, 0x8b])  // check magic number
+        starts(with: [0x1F, 0x8B]) // check magic number
     }
 
     /// Create a new `Data` object by compressing the receiver using zlib.
@@ -178,7 +175,7 @@ extension Bytes {
 
             try withUnsafeBytes { input in
                 guard let pointer = input.bindMemory(to: Bytef.self).baseAddress else {
-                    throw GzipError.init(code: 0, msg: nil)
+                    throw GzipError(code: 0, msg: nil)
                 }
 
                 stream.next_in = UnsafeMutablePointer<Bytef>(mutating: pointer).advanced(by: Int(stream.total_in))
@@ -186,7 +183,7 @@ extension Bytes {
 
                 try out.withUnsafeMutableBytes { output in
                     guard let pointer = output.bindMemory(to: Bytef.self).baseAddress else {
-                        throw GzipError.init(code: 0, msg: nil)
+                        throw GzipError(code: 0, msg: nil)
                     }
 
                     stream.next_out = pointer.advanced(by: Int(stream.total_out))
@@ -208,7 +205,6 @@ extension Bytes {
 
         return out.prefix(Int(stream.total_out))
     }
-
 
     /// Create a new `Data` object by decompressing the receiver using zlib.
     /// Throws an error if decompression failed.
@@ -244,16 +240,16 @@ extension Bytes {
 
             try withUnsafeBytes { input in
                 guard let pointer = input.bindMemory(to: Bytef.self).baseAddress else {
-                    throw GzipError.init(code: 0, msg: nil)
+                    throw GzipError(code: 0, msg: nil)
                 }
 
                 stream.next_in = UnsafeMutablePointer<Bytef>(mutating: pointer).advanced(by: Int(stream.total_in))
-                
+
                 stream.avail_in = uInt(count) - uInt(stream.total_in)
 
                 try out.withUnsafeMutableBytes { output in
                     guard let pointer = output.bindMemory(to: Bytef.self).baseAddress else {
-                        throw GzipError.init(code: 0, msg: nil)
+                        throw GzipError(code: 0, msg: nil)
                     }
 
                     stream.next_out = pointer.advanced(by: Int(stream.total_out))
@@ -281,10 +277,9 @@ extension Bytes {
 
         return out.prefix(Int(stream.total_out))
     }
-
 }
 
-private struct DataSize {
+private enum DataSize {
     static let chunk = 1 << 14
     static let stream = MemoryLayout<z_stream>.size
 }

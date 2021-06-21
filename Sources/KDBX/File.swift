@@ -16,12 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
+import Foundation
 
-public let FileSignature: UInt32 = 0x9AA2D903
-public let BetaFileFormat: UInt32 = 0xB54BFB66
-public let FileFormat: UInt32 = 0xB54BFB67
+public let FileSignature: UInt32 = 0x9AA2_D903
+public let BetaFileFormat: UInt32 = 0xB54B_FB66
+public let FileFormat: UInt32 = 0xB54B_FB67
 
 public struct Version {
     let major: UInt16
@@ -90,5 +90,4 @@ extension Version: Streamable {
         try output.write(minor)
         try output.write(major)
     }
-
 }

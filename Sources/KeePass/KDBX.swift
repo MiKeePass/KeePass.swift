@@ -16,21 +16,21 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePass. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
-import XML
+import Foundation
 import KDBX
+import XML
 
 let DateFormatter = ISO8601DateFormatter()
 
-extension CompositeKey: KDBX.CompositeKey { }
+extension CompositeKey: KDBX.CompositeKey {}
 
 extension KDBX.File: Database {
 
     public var root: Element { database.document.root.KeePassFile.Root }
 
     public func write(to output: Output, compositeKey: CompositeKey) throws {
-        try self.write(to: output, compositeKey: compositeKey as KDBX.CompositeKey )
+        try write(to: output, compositeKey: compositeKey as KDBX.CompositeKey)
     }
 }
 
@@ -43,7 +43,6 @@ extension XML.Element {
     convenience init(_ field: Field) {
         self.init(name: field.name, value: field.value, attributes: [:])
     }
-
 }
 
 extension Field {
@@ -59,7 +58,7 @@ extension Field {
 
 extension XML.Element: Entry {
 
-    public var times: Timestamp { self.Times }
+    public var times: Timestamp { Times }
 
     public var fields: [Field] {
         allDescendants(where: { $0.name == "String" }).compactMap { Field($0) }
@@ -68,39 +67,38 @@ extension XML.Element: Entry {
     public func set(_ field: Field) {
         allDescendants(where: { $0.name == field.name })
             .forEach { $0.removeFromParent() }
-        addChild( XML.Element(field) )
+        addChild(XML.Element(field))
     }
 }
 
 extension XML.Element: Timestamp {
 
     public var creationDate: Date {
-        self.CreationTime.date(formatter: DateFormatter) ?? .distantPast
+        CreationTime.date(formatter: DateFormatter) ?? .distantPast
     }
 
     public var lastModifiedDate: Date {
-        get { self.LastModificationTime.date(formatter: DateFormatter) ?? .distantPast }
-        set { self.LastModificationTime.value = DateFormatter.string(from: newValue) }
+        get { LastModificationTime.date(formatter: DateFormatter) ?? .distantPast }
+        set { LastModificationTime.value = DateFormatter.string(from: newValue) }
     }
 
     public var lastAccessDate: Date {
-        get { self.LastAccessTime.date(formatter: DateFormatter) ?? .distantPast }
-        set { self.LastAccessTime.value = DateFormatter.string(from: newValue) }
+        get { LastAccessTime.date(formatter: DateFormatter) ?? .distantPast }
+        set { LastAccessTime.value = DateFormatter.string(from: newValue) }
     }
 
     public var expirationDate: Date? {
-        get { self.ExpiryTime.date(formatter: DateFormatter) }
+        get { ExpiryTime.date(formatter: DateFormatter) }
         set {
             if let value = newValue {
-                self.ExpiryTime.value = DateFormatter.string(from: value)
+                ExpiryTime.value = DateFormatter.string(from: value)
                 addChild(name: "Expires", value: "True")
             } else {
-                self.ExpiryTime.value = DateFormatter.string(from: Date.distantFuture)
+                ExpiryTime.value = DateFormatter.string(from: Date.distantFuture)
                 addChild(name: "Expires", value: "False")
             }
         }
     }
-
 }
 
 extension XML.Element: Group {
@@ -125,5 +123,4 @@ extension XML.Element: Group {
     public var groups: [Element] {
         allDescendants(where: { $0.name == "Group" })
     }
-
 }

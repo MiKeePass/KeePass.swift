@@ -1,6 +1,6 @@
-import XCTest
 import Binary
 @testable import KeePass
+import XCTest
 
 final class KeePassTests: XCTestCase {
 

@@ -1,0 +1,11 @@
+--exclude .build
+
+--disable unusedArguments
+--disable wrapSwitchCases
+--disable wrapMultilineStatementBraces
+--disable blankLinesAtStartOfScope
+
+--extensionacl on-declarations
+--ifdef outdent
+--maxwidth 120
+--wrapparameters after-first

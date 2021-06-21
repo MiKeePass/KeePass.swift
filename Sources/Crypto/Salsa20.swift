@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
+import Foundation
 import Sodium
 
 public final class Salsa20 {
@@ -45,12 +45,11 @@ extension Salsa20: Cipher {
 
     public func encrypt(data: Bytes) throws -> Bytes {
         var out = Bytes(lenght: lenght(data))
-        crypto_stream_salsa20_xor(&out.rawValue, data.rawValue, lenght(data), nonce.rawValue, key.rawValue);
+        crypto_stream_salsa20_xor(&out.rawValue, data.rawValue, lenght(data), nonce.rawValue, key.rawValue)
         return out
     }
 
     public func decrypt(data: Bytes) throws -> Bytes {
         try encrypt(data: data)
     }
-
 }

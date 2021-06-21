@@ -16,9 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePassKit. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
 import Crypto
+import Foundation
 
 struct Header {
     let cipher: Flag
@@ -35,10 +35,10 @@ struct Header {
 struct Flag: OptionSet, Streamable {
     let rawValue: UInt32
 
-    static let sha2     = Flag(rawValue: 1<<0)
-    static let aes      = Flag(rawValue: 1<<1)
-    static let arc4     = Flag(rawValue: 1<<2)
-    static let twofish  = Flag(rawValue: 1<<3)
+    static let sha2 = Flag(rawValue: 1 << 0)
+    static let aes = Flag(rawValue: 1 << 1)
+    static let arc4 = Flag(rawValue: 1 << 2)
+    static let twofish = Flag(rawValue: 1 << 3)
 }
 
 extension Header: Streamable {
@@ -89,6 +89,6 @@ extension Header {
         let kdf = try AESKeyDerivation(seed: transformSeed, rounds: UInt64(transformRounds))
         let derivedKey = try kdf.derive(key: key)
 
-        return SHA256.hash( masterSeed + derivedKey )
+        return SHA256.hash(masterSeed + derivedKey)
     }
 }

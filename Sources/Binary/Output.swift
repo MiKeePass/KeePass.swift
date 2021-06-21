@@ -53,5 +53,4 @@ public class Output {
     public func write<T>(_ value: T) throws where T: Writable {
         try value.write(to: self)
     }
-
 }

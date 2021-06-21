@@ -16,8 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with KeePass. If not, see <https://www.gnu.org/licenses/>.
 
-import Foundation
 import Binary
+import Foundation
 
 @inline(never)
 func _abstract(file: StaticString = #file, line: UInt = #line) -> Never {
@@ -32,7 +32,7 @@ class _AnyDatabaseBoxBase: Database {
 }
 
 final class _AnyDatabaseBox<Base>: _AnyDatabaseBoxBase where Base: Database {
-    override var root: AnyGroup { AnyGroup( _base.root ) }
+    override var root: AnyGroup { AnyGroup(_base.root) }
     var _base: Base
     init(_ base: Base) { _base = base }
     override func write(to output: Output, compositeKey: CompositeKey) throws {
@@ -46,6 +46,7 @@ class AnyDatabase: Database {
     init<T>(_ base: T) where T: Database {
         _box = _AnyDatabaseBox(base)
     }
+
     func write(to output: Output, compositeKey: CompositeKey) throws {
         try _box.write(to: output, compositeKey: compositeKey)
     }
@@ -81,8 +82,13 @@ final class _AnyGroupBox<Base>: _AnyGroupBoxBase where Base: Group {
         set { _base.icon = newValue }
     }
 
-    override var entries: AnyRandomAccessCollection<AnyEntry> { AnyRandomAccessCollection<AnyEntry>(_base.entries.map { AnyEntry($0) }) }
-    override var groups: AnyRandomAccessCollection<AnyGroup> { AnyRandomAccessCollection<AnyGroup>(_base.groups.map { AnyGroup($0) }) }
+    override var entries: AnyRandomAccessCollection<AnyEntry> {
+        AnyRandomAccessCollection<AnyEntry>(_base.entries.map { AnyEntry($0) })
+    }
+
+    override var groups: AnyRandomAccessCollection<AnyGroup> {
+        AnyRandomAccessCollection<AnyGroup>(_base.groups.map { AnyGroup($0) })
+    }
 
     var _base: Base
     init(_ base: Base) { _base = base }
