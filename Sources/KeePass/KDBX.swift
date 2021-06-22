@@ -58,7 +58,7 @@ extension Field {
 
 extension XML.Element: Entry {
 
-    public var times: Timestamp { Times }
+    public var times: Timestamp { self.Times }
 
     public var fields: [Field] {
         allDescendants(where: { $0.name == "String" }).compactMap { Field($0) }
@@ -74,27 +74,27 @@ extension XML.Element: Entry {
 extension XML.Element: Timestamp {
 
     public var creationDate: Date {
-        CreationTime.date(formatter: DateFormatter) ?? .distantPast
+        self.CreationTime.date(formatter: DateFormatter) ?? .distantPast
     }
 
     public var lastModifiedDate: Date {
-        get { LastModificationTime.date(formatter: DateFormatter) ?? .distantPast }
-        set { LastModificationTime.value = DateFormatter.string(from: newValue) }
+        get { self.LastModificationTime.date(formatter: DateFormatter) ?? .distantPast }
+        set { self.LastModificationTime.value = DateFormatter.string(from: newValue) }
     }
 
     public var lastAccessDate: Date {
-        get { LastAccessTime.date(formatter: DateFormatter) ?? .distantPast }
-        set { LastAccessTime.value = DateFormatter.string(from: newValue) }
+        get { self.LastAccessTime.date(formatter: DateFormatter) ?? .distantPast }
+        set { self.LastAccessTime.value = DateFormatter.string(from: newValue) }
     }
 
     public var expirationDate: Date? {
-        get { ExpiryTime.date(formatter: DateFormatter) }
+        get { self.ExpiryTime.date(formatter: DateFormatter) }
         set {
             if let value = newValue {
-                ExpiryTime.value = DateFormatter.string(from: value)
+                self.ExpiryTime.value = DateFormatter.string(from: value)
                 addChild(name: "Expires", value: "True")
             } else {
-                ExpiryTime.value = DateFormatter.string(from: Date.distantFuture)
+                self.ExpiryTime.value = DateFormatter.string(from: Date.distantFuture)
                 addChild(name: "Expires", value: "False")
             }
         }

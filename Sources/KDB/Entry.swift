@@ -21,6 +21,8 @@ import Foundation
 
 public final class Entry: Row, Streamable {
 
+    public typealias Property = TLV<Column, UInt32>
+
     public enum Column: UInt16, Streamable, Endable {
         case reserved = 0x0000
         case uuid = 0x0001
@@ -44,7 +46,7 @@ public final class Entry: Row, Streamable {
 
     public internal(set) weak var parent: Group?
 
-    public var properties: [TLV<Column, UInt32>]
+    public var properties: [Property]
 
     public init() {
         properties = []
@@ -72,6 +74,5 @@ extension Entry: Hashable {
 
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self[.uuid])
-        hasher.combine(self[.title])
     }
 }
