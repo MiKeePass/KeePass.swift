@@ -20,12 +20,10 @@ open class Document: Element {
 
     /// Root (the first child element) element of XML Document **(Empty element with error if not exists)**.
     open var root: Element {
-        guard let rootElement = children.first else {
-            let errorElement = Element(name: "Error")
-            errorElement.error = XMLError.rootElementMissing
-            return errorElement
-        }
-        return rootElement
+        if let element = children.first { return element }
+        let element = Element(name: "Error")
+        element.error = XMLError.rootElementMissing
+        return element
     }
 
     public let options: Options
@@ -40,18 +38,18 @@ open class Document: Element {
 
          - returns: Initialized XML Document object.
      */
-    public init(root: Element? = nil, options: Options = Options()) {
+    public init(root: Element? = nil, options: Options = .init()) {
         self.options = options
 
-        let documentName = String(describing: Document.self)
-        super.init(name: documentName)
+        let name = String(describing: Document.self)
+        super.init(name: name)
 
         // document has no parent element
         parent = nil
 
         // add root element to document (if any)
-        if let rootElement = root {
-            addChild(rootElement)
+        if let root = root {
+            addChild(root)
         }
     }
 
@@ -63,7 +61,7 @@ open class Document: Element {
 
          - returns: Initialized XML Document object containing parsed data. Throws error if data could not be parsed.
      */
-    public convenience init(xml: Data, options: Options = Options()) throws {
+    public convenience init(xml: Data, options: Options = .init()) throws {
         self.init(options: options)
         try load(xml)
     }
@@ -78,7 +76,7 @@ open class Document: Element {
          - returns: Initialized XML Document object containing parsed data. Throws error if data could not be parsed.
      */
     public convenience init(xml: String,
-                            encoding: String.Encoding = String.Encoding.utf8,
+                            encoding: String.Encoding = .utf8,
                             options: Options = Options()) throws {
         guard let data = xml.data(using: encoding) else { throw XMLError.parsingFailed }
         try self.init(xml: data, options: options)
@@ -94,16 +92,14 @@ open class Document: Element {
      */
     open func load(_ data: Data) throws {
         children.removeAll(keepingCapacity: false)
-        let xmlParser = Parser(document: self, data: data)
-        try xmlParser.parse()
+        let parser = Parser(document: self, data: data)
+        try parser.parse()
     }
 
     // MARK: - Override
 
     /// Override of `xml` property of `Element` - it just inserts XML Document header at the beginning.
     override open var xml: String {
-        var xml = "\(options.documentHeader.xmlString)\n"
-        xml += root.xml
-        return xml
+        "\(options.documentHeader.xml)\n\(root.xml)"
     }
 }

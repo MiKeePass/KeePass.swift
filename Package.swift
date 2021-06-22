@@ -84,7 +84,13 @@ let package = Package(
 
         .target(
             name: "XML",
-            dependencies: []
+            dependencies: [],
+            exclude: ["LICENSE"]
+        ),
+        .testTarget(
+            name: "XMLTests",
+            dependencies: ["XML"],
+            resources: [.process("Resources")]
         ),
 
         // MARK: KeePass Cryptographic Libraries

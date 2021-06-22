@@ -72,6 +72,11 @@ open class Element {
         self[member]
     }
 
+    public subscript<T>(dynamicMember member: String) -> T? where T: LosslessStringConvertible {
+        guard let string = self[member].value, let value = T(string) else { return nil }
+        return value
+    }
+
     open func get<T>() throws -> T where T: LosslessStringConvertible {
         guard let string = value, let value = T(string) else { throw XMLError.valueConversionFailed }
         return value
@@ -82,22 +87,22 @@ open class Element {
         return formatter.date(from: value)
     }
 
-    open func date(formatter: ISO8601DateFormatter = ISO8601DateFormatter()) -> Date? {
+    open func date(formatter: ISO8601DateFormatter = .init()) -> Date? {
         guard let value = value else { return nil }
         return formatter.date(from: value)
     }
 
     /// Returns all of the elements with equal name as `self` **(nil if not exists)**.
-    open var all: [Element]? { return parent?.children.filter { $0.name == self.name } }
+    open var all: [Element]? { parent?.children.filter { $0.name == self.name } }
 
     /// Returns the first element with equal name as `self` **(nil if not exists)**.
-    open var first: Element? { return all?.first }
+    open var first: Element? { all?.first }
 
     /// Returns the last element with equal name as `self` **(nil if not exists)**.
-    open var last: Element? { return all?.last }
+    open var last: Element? { all?.last }
 
     /// Returns number of all elements with equal name as `self`.
-    open var count: Int { return all?.count ?? 0 }
+    open var count: Int { all?.count ?? 0 }
 
     /**
          Returns all elements with given value.
@@ -107,7 +112,7 @@ open class Element {
          - returns: Optional Array of found XML elements.
      */
     open func all(withValue value: String) -> [Element]? {
-        return all?.compactMap { $0.value == value ? $0 : nil }
+        all?.compactMap { $0.value == value ? $0 : nil }
     }
 
     /**
@@ -118,7 +123,7 @@ open class Element {
          - returns: Optional Array of found XML elements.
      */
     open func all(containingAttributeKeys keys: [String]) -> [Element]? {
-        return all?.compactMap { element in
+        all?.compactMap { element in
             keys.reduce(true) { result, key in
                 result && Array(element.attributes.keys).contains(key)
             } ? element : nil
@@ -173,11 +178,11 @@ open class Element {
 
          - returns: Optional Element.
      */
-    open func firstDescendant(where predicate: (Element) -> Bool) -> Element? {
+    open func firstDescendant(where predicate: (Element) throws -> Bool) rethrows -> Element? {
         for child in children {
-            if predicate(child) {
+            if try predicate(child) {
                 return child
-            } else if let descendant = child.firstDescendant(where: predicate) {
+            } else if let descendant = try child.firstDescendant(where: predicate) {
                 return descendant
             }
         }
@@ -191,8 +196,8 @@ open class Element {
 
          - returns: Bool.
      */
-    open func hasDescendant(where predicate: (Element) -> Bool) -> Bool {
-        return firstDescendant(where: predicate) != nil
+    open func hasDescendant(where predicate: (Element) throws -> Bool) rethrows -> Bool {
+        try firstDescendant(where: predicate) != nil
     }
 
     // MARK: - XML Write

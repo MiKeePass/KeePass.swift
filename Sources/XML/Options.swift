@@ -24,7 +24,7 @@ public struct Options {
         public var standalone = "no"
 
         /// XML Document header
-        public var xmlString: String {
+        public var xml: String {
             return "<?xml version=\"\(version)\" encoding=\"\(encoding)\" standalone=\"\(standalone)\"?>"
         }
     }
