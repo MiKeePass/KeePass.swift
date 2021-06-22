@@ -330,8 +330,4 @@ class TwofishTests: XCTestCase {
 //        pt = try Twofish(key: key).decrypt(data: ct)
 //        XCTAssertEqual(pt.hexa.uppercased(), "C5A3E7CEE0F1B7260528A68FB4EA05F2", "Twofish: Decrypt Keysize=256 I=10 failed")
 //    }
-
-    // static var allTests = [
-    //     ("testSalsa20", testSalsa20),
-    // ]
 }

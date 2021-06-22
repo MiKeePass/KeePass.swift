@@ -28,10 +28,4 @@ final class KeePassTests: XCTestCase {
         let db = try KeePass.open(contentOf: file, compositeKey: key)
         print(db)
     }
-
-    static var allTests = [
-        ("testKDB", testKDB),
-        ("testKDBX3", testKDBX3),
-        ("testKDBX4", testKDBX4),
-    ]
 }

@@ -241,8 +241,4 @@ class Chacha20Tests: XCTestCase {
             }
         }
     }
-
-    static var allTests = [
-        ("testChaCha20", testChaCha20),
-    ]
 }

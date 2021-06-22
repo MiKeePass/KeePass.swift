@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.4
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -80,6 +80,11 @@ let package = Package(
             name: "Gzip",
             dependencies: ["Binary"],
             exclude: ["LICENSE"]
+        ),
+        .testTarget(
+            name: "GzipTests",
+            dependencies: ["Gzip"],
+            resources: [.process("Resources")]
         ),
 
         .target(

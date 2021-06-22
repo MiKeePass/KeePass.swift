@@ -240,8 +240,4 @@ class Salsa20Tests: XCTestCase {
             }
         }
     }
-
-    static var allTests = [
-        ("testSalsa20", testSalsa20),
-    ]
 }
