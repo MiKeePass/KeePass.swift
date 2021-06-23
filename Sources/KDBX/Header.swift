@@ -49,13 +49,13 @@ enum InnerHeader: UInt8, Streamable, Endable {
     public static var endValue: InnerHeader { .end }
 }
 
-enum Compression: UInt32, BytesRepresentable {
+enum Compression: UInt32, LosslessBytesConvertible {
     case none = 0
     case gzip = 1
     case count = 2
 }
 
-enum RandomStream: UInt32, BytesRepresentable {
+enum RandomStream: UInt32, LosslessBytesConvertible {
     case none = 0
     case arc4 = 1
     case salsa20 = 2

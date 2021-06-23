@@ -1,4 +1,4 @@
-// BytesRepresentable.swift
+// Convertible.swift
 // This file is part of KeePass.swift
 //
 // Copyright © 2021 Maxime Epain. All rights reserved.
@@ -18,18 +18,23 @@
 
 import Foundation
 
-// MARK: - Bytes Representatble Protocol
+/// A type with a customized bytes representation.
+public protocol CustomBytesConvertible {
 
-public protocol BytesRepresentable {
-
-    init(_ bytes: Bytes) throws
-
+    /// A bytes representation of this instance.
     var bytes: Bytes { get }
+}
+
+public protocol LosslessBytesConvertible: CustomBytesConvertible {
+
+    /// Instantiates an instance of the conforming type from bytes
+    /// representation.
+    init(_ bytes: Bytes) throws
 }
 
 // MARK: - Streamable Boolean Bytes
 
-extension Bool: BytesRepresentable {
+extension Bool: LosslessBytesConvertible {
 
     public init(_ bytes: Bytes) throws {
         guard bytes.lenght == MemoryLayout<Self>.size else { throw BinaryError.invalidLenght }
@@ -43,7 +48,7 @@ extension Bool: BytesRepresentable {
 
 // MARK: - Streamable Integer
 
-extension BytesRepresentable where Self: BinaryInteger {
+extension LosslessBytesConvertible where Self: BinaryInteger {
 
     public init(_ bytes: Bytes) throws {
         guard bytes.lenght == MemoryLayout<Self>.size else { throw BinaryError.invalidLenght }
@@ -55,29 +60,29 @@ extension BytesRepresentable where Self: BinaryInteger {
     }
 }
 
-extension Int: BytesRepresentable {}
+extension Int: LosslessBytesConvertible {}
 
-extension Int8: BytesRepresentable {}
+extension Int8: LosslessBytesConvertible {}
 
-extension Int16: BytesRepresentable {}
+extension Int16: LosslessBytesConvertible {}
 
-extension Int32: BytesRepresentable {}
+extension Int32: LosslessBytesConvertible {}
 
-extension Int64: BytesRepresentable {}
+extension Int64: LosslessBytesConvertible {}
 
-extension UInt: BytesRepresentable {}
+extension UInt: LosslessBytesConvertible {}
 
-extension UInt8: BytesRepresentable {}
+extension UInt8: LosslessBytesConvertible {}
 
-extension UInt16: BytesRepresentable {}
+extension UInt16: LosslessBytesConvertible {}
 
-extension UInt32: BytesRepresentable {}
+extension UInt32: LosslessBytesConvertible {}
 
-extension UInt64: BytesRepresentable {}
+extension UInt64: LosslessBytesConvertible {}
 
 // MARK: - Streamable Floating Point
 
-extension BytesRepresentable where Self: FloatingPoint {
+extension LosslessBytesConvertible where Self: FloatingPoint {
 
     public init(_ bytes: Bytes) throws {
         guard bytes.lenght == MemoryLayout<Self>.size else { throw BinaryError.invalidLenght }
@@ -85,17 +90,17 @@ extension BytesRepresentable where Self: FloatingPoint {
     }
 
     public var bytes: Bytes {
-        withUnsafeBytes(of: self) { Bytes(rawValue: Array($0)) }
+        withUnsafeBytes(of: self) { Bytes($0) }
     }
 }
 
-extension Double: BytesRepresentable {}
+extension Double: LosslessBytesConvertible {}
 
-extension Float: BytesRepresentable {}
+extension Float: LosslessBytesConvertible {}
 
 // MARK: - RawRepresentable Bytes
 
-extension BytesRepresentable where Self: RawRepresentable, RawValue: BytesRepresentable {
+extension LosslessBytesConvertible where Self: RawRepresentable, RawValue: LosslessBytesConvertible {
 
     public init(_ bytes: Bytes) throws {
         let rawValue = try RawValue(bytes)
@@ -108,7 +113,7 @@ extension BytesRepresentable where Self: RawRepresentable, RawValue: BytesRepres
 
 // MARK: - Bytes
 
-extension Bytes: BytesRepresentable {
+extension Bytes: LosslessBytesConvertible {
 
     public init(_ bytes: Bytes) throws {
         self = bytes
@@ -121,7 +126,7 @@ extension Bytes: BytesRepresentable {
 
 extension Array where Element == Bytes {
 
-    subscript<T>(_ index: Int) -> T? where T: BytesRepresentable {
+    subscript<T>(_ index: Int) -> T? where T: LosslessBytesConvertible {
         try? T(self[index])
     }
 }
@@ -130,7 +135,7 @@ extension Array where Element == Bytes {
 
 extension Dictionary where Value == Bytes {
 
-    subscript<T>(_ key: Key) -> T? where T: BytesRepresentable {
+    subscript<T>(_ key: Key) -> T? where T: LosslessBytesConvertible {
         guard let bytes = self[key] else { return nil }
         return try? T(bytes)
     }
@@ -138,7 +143,7 @@ extension Dictionary where Value == Bytes {
 
 // MARK: - String Bytes
 
-extension String: BytesRepresentable {
+extension String: LosslessBytesConvertible {
 
     public var bytes: Bytes { bytes(using: .utf8) ?? [] }
 
@@ -150,7 +155,7 @@ extension String: BytesRepresentable {
 
 // MARK: - Data Bytes
 
-extension Data: BytesRepresentable {
+extension Data: LosslessBytesConvertible {
 
     public var bytes: Bytes { Bytes(data: self) }
 
@@ -161,7 +166,7 @@ extension Data: BytesRepresentable {
 
 // MARK: - UUID Bytes
 
-extension UUID: BytesRepresentable {
+extension UUID: LosslessBytesConvertible {
 
     public var bytes: Bytes {
         withUnsafeBytes(of: uuid) { Bytes($0) }
@@ -174,7 +179,7 @@ extension UUID: BytesRepresentable {
     }
 }
 
-extension Optional where Wrapped: BytesRepresentable {
+extension Optional where Wrapped: LosslessBytesConvertible {
 
     public init(_ bytes: Bytes?) {
         if let bytes = bytes, let wrapped = try? Wrapped(bytes) {

@@ -48,7 +48,7 @@ public protocol Readable {
 /// any type that conforms to both protocols.
 public typealias Streamable = Readable & Writable
 
-extension Readable where Self: BytesRepresentable {
+extension Readable where Self: LosslessBytesConvertible {
 
     public init(from input: Input) throws {
         let bytes = try input.read(lenght: MemoryLayout<Self>.size)
@@ -56,7 +56,7 @@ extension Readable where Self: BytesRepresentable {
     }
 }
 
-extension Writable where Self: BytesRepresentable {
+extension Writable where Self: LosslessBytesConvertible {
 
     public func write(to output: Output) throws {
         try output.write(bytes)

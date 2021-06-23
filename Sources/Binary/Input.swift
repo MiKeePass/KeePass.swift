@@ -50,7 +50,7 @@ public class Input {
         return out.prefix(count)
     }
 
-    public func read<T>(lenght: Int) throws -> T where T: BytesRepresentable {
+    public func read<T>(lenght: Int) throws -> T where T: LosslessBytesConvertible {
         let bytes = try read(lenght: lenght)
         return try T(bytes)
     }

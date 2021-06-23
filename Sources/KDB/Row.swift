@@ -58,7 +58,7 @@ extension Row where Column: Equatable {
         return Database.date(from: bytes)
     }
 
-    public subscript<T>(_ column: Column) -> T? where T: BytesRepresentable {
+    public subscript<T>(_ column: Column) -> T? where T: LosslessBytesConvertible {
         get { T?(self[column]) }
         set { self[column] = newValue?.bytes }
     }
@@ -71,7 +71,7 @@ extension Row where Column: Equatable {
 extension Sequence where Element: Row, Element.Column: Equatable {
 
     public func first<T>(column: Element.Column, where predicate: (T) throws -> Bool) throws -> Element?
-        where T: BytesRepresentable {
+        where T: LosslessBytesConvertible {
         try first(where: {
             guard let bytes = $0[column] else { return false }
             return try predicate(T(bytes))
@@ -79,7 +79,7 @@ extension Sequence where Element: Row, Element.Column: Equatable {
     }
 
     public func sorted<T>(column: Element.Column, by areInIncreasingOrder: (T, T) throws -> Bool) throws -> [Element]
-        where T: BytesRepresentable {
+        where T: LosslessBytesConvertible {
         try sorted(by: {
             guard let rhs = $0[column], let lhs = $1[column] else { return false }
             return try areInIncreasingOrder(T(rhs), T(lhs))

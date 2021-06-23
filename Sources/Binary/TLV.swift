@@ -46,11 +46,11 @@ public struct TLV<Type, Lenght>: TypeLenghtValue where Lenght: BinaryInteger {
         self.value = value
     }
 
-    public func get<T>() throws -> T where T: BytesRepresentable {
+    public func get<T>() throws -> T where T: LosslessBytesConvertible {
         try T(value)
     }
 
-    public mutating func set<T>(_ value: T?) throws where T: BytesRepresentable {
+    public mutating func set<T>(_ value: T?) throws where T: LosslessBytesConvertible {
         self.value = value?.bytes ?? []
     }
 }
@@ -75,22 +75,22 @@ extension TLV: Writable where Type: Writable, Lenght: Writable {
 
 extension Sequence where Element: TypeLenghtValue, Element.Type_: Equatable, Element.Value == Bytes {
 
-    public func first<T>(valueOf type: Element.Type_) throws -> T? where T: BytesRepresentable {
+    public func first<T>(valueOf type: Element.Type_) throws -> T? where T: LosslessBytesConvertible {
         return try first(where: { $0.type == type }).map { try T($0.value) }
     }
 
     public func first<T>(where type: Element.Type_, _ predicate: (T) throws -> Bool) throws -> Element?
-        where T: BytesRepresentable {
+        where T: LosslessBytesConvertible {
         return try first(where: { try predicate(try T($0.value)) })
     }
 
     public func sorted<T>(field: Element.Type_,
                           by areInIncreasingOrder: (T, T) throws -> Bool) throws -> [Self.Element]
-        where T: BytesRepresentable {
+        where T: LosslessBytesConvertible {
         return try sorted(by: { try areInIncreasingOrder(try T($0.value), try T($1.value)) })
     }
 
-    public subscript<T>(_ type: Element.Type_) -> T? where T: BytesRepresentable {
+    public subscript<T>(_ type: Element.Type_) -> T? where T: LosslessBytesConvertible {
         try? first(valueOf: type)
     }
 }
@@ -105,7 +105,7 @@ extension RangeReplaceableCollection where Element: TypeLenghtValue, Element.Typ
 extension TLV: CustomDebugStringConvertible {
 
     public var debugDescription: String {
-        "(T:\(type) L:\(value.lenght))"
+        "(T:\(type)\nL:\(value.lenght)/nV:\(value.hexa)"
     }
 }
 

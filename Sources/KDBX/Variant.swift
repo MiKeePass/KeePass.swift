@@ -134,7 +134,7 @@ public enum Variant {
         return value
     }
 
-    func unwrap<T>() throws -> T where T: BytesRepresentable {
+    func unwrap<T>() throws -> T where T: LosslessBytesConvertible {
         guard case let .Bytes(bytes) = self else { throw KDBXError.invalidValue }
         return try T(bytes)
     }
@@ -263,16 +263,19 @@ extension Dictionary: Streamable where Key == String, Value == Variant {
     }
 }
 
-extension Dictionary: BytesRepresentable where Key == String, Value == Variant {
-
-    public init(_ bytes: Bytes) throws {
-        let input = Input(bytes: bytes)
-        try self.init(from: input)
-    }
+extension Dictionary: CustomBytesConvertible where Key == String, Value == Variant {
 
     public var bytes: Bytes {
         let output = Output()
         try? output.write(self)
         return output.bytes ?? []
+    }
+}
+
+extension Dictionary: LosslessBytesConvertible where Key == String, Value == Variant {
+
+    public init(_ bytes: Bytes) throws {
+        let input = Input(bytes: bytes)
+        try self.init(from: input)
     }
 }
