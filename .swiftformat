@@ -1,5 +1,6 @@
 --exclude .build
 
+--disable redundantSelf
 --disable unusedArguments
 --disable wrapSwitchCases
 --disable wrapMultilineStatementBraces
