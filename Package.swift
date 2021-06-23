@@ -118,7 +118,8 @@ let package = Package(
 
         .target(
             name: "Twofish",
-            dependencies: []
+            dependencies: [],
+            exclude: ["LICENSE"]
         ),
     ]
 )

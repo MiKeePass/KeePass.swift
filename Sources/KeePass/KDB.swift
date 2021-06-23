@@ -1,7 +1,7 @@
 // KDB.swift
 // This file is part of KeePass.
 //
-// Copyright © 2019 Maxime Epain. All rights reserved.
+// Copyright © 2021 Maxime Epain. All rights reserved.
 //
 // KeePass is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

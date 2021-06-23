@@ -1,7 +1,7 @@
 // Database0.swift
 // This file is part of KeePass.
 //
-// Copyright © 2019 ___ORGANIZATIONNAME___. All rights reserved.
+// Copyright © 2019 Maxime Epain. All rights reserved.
 //
 // KeePass is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

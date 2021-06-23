@@ -28,16 +28,16 @@
  THE SOFTWARE.
  */
 
-import XCTest
 import Binary
 import Gzip
+import XCTest
 
 final class GzipTests: XCTestCase {
 
     func testGZip() throws {
 
-        for _ in 0..<10 {
-            let testSentence = String.lorem(length: Int.random(in: 1..<100_000))
+        for _ in 0 ..< 10 {
+            let testSentence = String.lorem(length: Int.random(in: 1 ..< 100_000))
 
             let bytes = testSentence.bytes(using: .utf8)!
             let gzipped = try bytes.gzipped()
@@ -53,7 +53,6 @@ final class GzipTests: XCTestCase {
         }
     }
 
-
     func testZeroLength() throws {
 
         let zeroLengthBytes = Bytes()
@@ -62,7 +61,6 @@ final class GzipTests: XCTestCase {
         XCTAssertEqual(try zeroLengthBytes.gunzipped(), zeroLengthBytes)
         XCTAssertFalse(zeroLengthBytes.isGzipped)
     }
-
 
     func testWrongUngzip() {
 
@@ -84,7 +82,6 @@ final class GzipTests: XCTestCase {
         XCTAssertNil(uncompressed)
     }
 
-
     func testCompressionLevel() throws {
 
         let bytes = String.lorem(length: 100_000).bytes(using: .utf8)!
@@ -92,7 +89,6 @@ final class GzipTests: XCTestCase {
         XCTAssertGreaterThan(try bytes.gzipped(level: .bestSpeed).count,
                              try bytes.gzipped(level: .bestCompression).count)
     }
-
 
     func testFileDecompression() throws {
 
@@ -103,15 +99,14 @@ final class GzipTests: XCTestCase {
         XCTAssertTrue(bytes.isGzipped)
         XCTAssertEqual(String(bytes: uncompressed, encoding: .utf8), "test")
     }
-
 }
 
-private extension XCTestCase {
+extension XCTestCase {
 
     /// Create URL for bundled test file considering platform.
     ///
     /// - Parameter name: The file name to load in resources.
-    func bundleFile(name: String) -> URL {
+    fileprivate func bundleFile(name: String) -> URL {
         guard let url = Bundle.module.url(forResource: name, withExtension: nil) else {
             fatalError("can't find resource named: '\(name)'")
         }
@@ -120,16 +115,15 @@ private extension XCTestCase {
     }
 }
 
-private extension String {
+extension String {
 
     /// Generate random letters string for test.
-    static func lorem(length: Int) -> String {
+    fileprivate static func lorem(length: Int) -> String {
 
         let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "
 
-        return (0..<length).reduce(into: "") { (string, _) in
+        return (0 ..< length).reduce(into: "") { string, _ in
             string.append(letters.randomElement()!)
         }
     }
-
 }
